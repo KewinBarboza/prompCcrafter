@@ -10,6 +10,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Button } from "./ui/button"
+import Link from "next/link"
+import { ArrowBigLeft } from "lucide-react"
 
 const items = [
   {
@@ -42,7 +45,15 @@ const items = [
 export function AppSidebar() {
   return (
     <Sidebar variant="floating">
-      <SidebarHeader />
+      <SidebarHeader className="flex">
+        <Button size="lg" asChild>
+          <Link href='/created-prompt'>Crear prompt</Link>
+        </Button>
+
+        <Button size="lg" variant="outline" asChild>
+          <Link href='/'><ArrowBigLeft /></Link>
+        </Button>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
