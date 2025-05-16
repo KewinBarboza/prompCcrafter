@@ -11,8 +11,8 @@ export default function CreatedPromptLayout({
   children: React.ReactNode
 }>) {
   return (
-    <div className="container">
+    <>
       {children}
-    </div>
+    </>
   )
 }
