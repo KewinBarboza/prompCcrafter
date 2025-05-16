@@ -24,7 +24,7 @@ export default function CreatedPrompt() {
 
   return (
     <>
-      <section className="grid grid-cols-5 h-dvh w-dvw">
+      <section className="grid grid-cols-5  h-dvh w-dvw">
         <nav className="group col-span-2 bg-black p-5 content-center" aria-label="Checkout Steps">
           <Button size="lg" variant="link" className="text-white" asChild>
             <Link href='/'><ArrowBigLeft />Volver atrás</Link>
@@ -65,7 +65,7 @@ export default function CreatedPrompt() {
           </ol>
         </nav>
 
-        <div className="col-span-3 w-full flex justify-center items-center px-36">
+        <div className="col-span-3 w-full flex justify-center items-center px-10 md:px-36">
 
           <form className=" max-w-fit" action={getDataPrompt}>
             {methods.when("step-1", () => <Task />)}
@@ -116,20 +116,16 @@ const ObjectiveSummaryExample = ({
   description,
   value,
   name = "objectiveExample",
-  icon = "🙃"
 }: ObjectiveSummaryExampleProps) => (
   <label className="
-    has-checked:bg-blue-100
-    has-checked:text-blue-950
-    has-checked:ring-blue-400
-    has-checked:ring-2 ring-2 ring-neutral-300
-    flex text-xl p-4 rounded-xl justify-between
+    has-checked:ring-primary
+    has-checked:ring-2 ring ring-neutral-300
+    flex text-base p-4 rounded-3xl justify-between
     hover:bg-neutral-50 select-none">
-    <span className="flex items-start">
-      <span className="block me-4">{icon}</span>
-      <span className="block">
+    <span>
+      <span className="block font-bold font-sans">
         {label}
-        <span className="mt-1 block text-base">
+        <span className="mt-1 block text-sm font-light">
           {description}
         </span>
       </span>
@@ -138,7 +134,7 @@ const ObjectiveSummaryExample = ({
       type="radio"
       name={name}
       value={value}
-      className="checked:border-neutral-500"
+      hidden
     />
   </label>
 )
@@ -147,11 +143,15 @@ const Task = () => {
   return (
     <div>
       <Text text="1. ¿Cuál es el objetivo o tarea principal que quieres que el modelo realice?" />
-      <textarea id="objective" name="objective" rows={3} required className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Describe la acción o resultado deseado..."></textarea>
+      <textarea
+        id="objective"
+        name="objective" rows={3} required
+        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        placeholder="Describe la acción o resultado deseado..."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo de objetivo:</span>
-        <div className="grid grid-cols-2 gap-7">
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
           <ObjectiveSummaryExample
             name="objectiveExample"
             value="Resume el siguiente texto explicando solo los puntos clave sin agregar opiniones personales."
