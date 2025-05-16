@@ -1,13 +1,12 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { defineStepper } from "@stepperize/react"
 import { ArrowBigLeft } from "lucide-react"
 import Link from "next/link"
-import { Fragment, ReactNode } from "react"
+import { Fragment } from "react"
 
 const { useStepper, steps, utils } = defineStepper(
-  { id: "step-1", title: "Objetivo o tarea principal", description: "First step" },
+  { id: "step-1", title: "1. ¿Cuál es el objetivo o tarea principal que quieres que el modelo realice?", description: "First step" },
   { id: "step-2", title: "Entrada y salida deseada", description: "Second step" },
   { id: "step-3", title: "Formato deseas recibir la respuesta", description: "Third step" },
   { id: "step-4", title: "¿ Qué estilo, tono o rol debe adoptar el modelo ?", description: "Third step" },
@@ -24,49 +23,27 @@ export default function CreatedPrompt() {
 
   return (
     <>
-      <section className="grid grid-cols-5  h-dvh w-dvw">
-        <nav className="group col-span-2 bg-black p-5 content-center" aria-label="Checkout Steps">
+      <section className="h-dvh w-dvw grid-rows-3 flex flex-col items-center justify-center">
+        <div className="">
           <Button size="lg" variant="link" className="text-white" asChild>
             <Link href='/'><ArrowBigLeft />Volver atrás</Link>
           </Button>
-
-          <ol className="flex flex-col  justify-between gap-2 mt-10">
-            {methods.all.map((step, index, array) => (
-              <Fragment key={step.id}>
-                <li className="flex items-center gap-4 flex-shrink-0">
-                  <Button
-                    type="button"
-                    role="tab"
-                    variant={index <= currentIndex ? 'secondary' : 'default'}
-                    aria-current={
-                      methods.current.id === step.id ? 'step' : undefined
-                    }
-                    aria-posinset={index + 1}
-                    aria-setsize={steps.length}
-                    aria-selected={methods.current.id === step.id}
-                    className="flex size-10 items-center justify-center rounded-full"
-                    onClick={() => methods.goTo(step.id)}
-                  >
-                    {index + 1}
-                  </Button>
-                  <div>
-                    <span className="text-md block font-semibold text-white">{step.title}</span>
-                    <span className="text-sm font-medium text-white">{step.description}</span>
-                  </div>
-                </li>
-                {index < array.length - 1 && (
-                  <Separator
-                    className={`flex-1 ${index < currentIndex ? 'bg-primary' : 'bg-muted'
-                      }`}
-                  />
-                )}
-              </Fragment>
-            ))}
-          </ol>
-        </nav>
-
-        <div className="col-span-3 w-full flex justify-center items-center px-10 md:px-36">
-
+        </div>
+        <div className="py-6 max-w-4xl ">
+          <div className="flex gap-4">
+            <StepIndicator
+              currentStep={currentIndex + 1}
+              totalSteps={methods.all.length}
+            />
+            <div className="flex flex-col">
+              <Text text={methods.current.title} />
+              <p className="text-sm text-muted-foreground">
+                {methods.current.description}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-4xl flex flex-col ">
           <form className=" max-w-fit" action={getDataPrompt}>
             {methods.when("step-1", () => <Task />)}
             {methods.when("step-2", () => <InputOutput />)}
@@ -100,7 +77,61 @@ export default function CreatedPrompt() {
   )
 }
 
-const Text = ({ text }: { text: string }) => <p className="block text-2xl font-semibold text-gray-800 mb-5">{text}</p>
+interface StepIndicatorProps {
+  currentStep: number
+  totalSteps: number
+  size?: number
+  strokeWidth?: number
+}
+
+const StepIndicator = ({
+  currentStep,
+  totalSteps,
+  size = 50,
+  strokeWidth = 4,
+}: StepIndicatorProps) => {
+  const radius = (size - strokeWidth) / 2
+  const circumference = radius * 2 * Math.PI
+  const fillPercentage = (currentStep / totalSteps) * 100
+  const dashOffset = circumference - (circumference * fillPercentage) / 100
+
+  return (
+    <div className="relative inline-flex">
+      <svg width={size} height={size}>
+        <title>Step Indicator</title>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-muted-foreground"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={dashOffset}
+          className="text-primary transition-all duration-300 ease-in-out"
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-sm font-medium" aria-live="polite">
+          {currentStep} of {totalSteps}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+
+const Text = ({ text }: { text: string }) => <h2 className="flex-1 text-2xl font-semibold text-gray-800">{text}</h2>
 
 // Componente aparte:
 interface ObjectiveSummaryExampleProps {
@@ -142,7 +173,6 @@ const ObjectiveSummaryExample = ({
 const Task = () => {
   return (
     <div>
-      <Text text="1. ¿Cuál es el objetivo o tarea principal que quieres que el modelo realice?" />
       <textarea
         id="objective"
         name="objective" rows={3} required
