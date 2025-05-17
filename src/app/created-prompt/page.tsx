@@ -1,16 +1,41 @@
 "use client"
+
 import { Button } from "@/components/ui/button"
 import { defineStepper } from "@stepperize/react"
-import { ArrowBigLeft } from "lucide-react"
+import { MoveLeft } from "lucide-react"
 import Link from "next/link"
-import { Fragment } from "react"
 
-const { useStepper, steps, utils } = defineStepper(
-  { id: "step-1", title: "1. ¿Cuál es el objetivo o tarea principal que quieres que el modelo realice?", description: "First step" },
-  { id: "step-2", title: "Entrada y salida deseada", description: "Second step" },
-  { id: "step-3", title: "Formato deseas recibir la respuesta", description: "Third step" },
-  { id: "step-4", title: "¿ Qué estilo, tono o rol debe adoptar el modelo ?", description: "Third step" },
-  { id: "step-5", title: "Configuraciones o restricciones adicionales", description: "Third step" },
+const { useStepper, utils } = defineStepper(
+  {
+    id: "step-1",
+    title: "1. ¿Cuál es el objetivo o tarea principal que quieres que el modelo realice?",
+    description: "Describe la tarea central que la IA debe realizar. Sé específico y claro."
+  },
+  {
+    id: "step-2",
+    title: "2. Contexto Relevante",
+    description: "Proporciona la información de fondo necesaria para que la IA entienda la situación completamente."
+  },
+  {
+    id: "step-3",
+    title: "3. Selecciona un ejemplo de entrada y salida deseada",
+    description: "Proporcionar ejemplos (técnica few-shot) es muy efectivo para guiar a la IA. Para clasificación, mezcla las clases en los ejemplos."
+  },
+  {
+    id: "step-4",
+    title: "4. ¿En qué formato deseas recibir la respuesta?",
+    description: "Especificar el formato ayuda a obtener resultados estructurados."
+  },
+  {
+    id: "step-5",
+    title: "5. ¿Qué estilo, tono o rol debe adoptar el modelo al generar la respuesta?",
+    description: "El tono adecuado puede hacer la respuesta más efectiva para tu audiencia."
+  },
+  {
+    id: "step-6",
+    title: "6. ¿Qué configuraciones o restricciones adicionales quieres aplicar?",
+    description: "Third step"
+  },
 )
 
 export default function CreatedPrompt() {
@@ -19,17 +44,18 @@ export default function CreatedPrompt() {
   const getDataPrompt = (formData: FormData) => {
     console.log(formData.get("objective"))
   }
+
   const currentIndex = utils.getIndex(methods.current.id)
 
   return (
     <>
       <section className="h-dvh w-dvw grid-rows-3 flex flex-col items-center justify-center">
-        <div className="">
-          <Button size="lg" variant="link" className="text-white" asChild>
-            <Link href='/'><ArrowBigLeft />Volver atrás</Link>
+        <div className="max-w-4xl flex justify-start w-full">
+          <Button size="lg" variant="link" asChild>
+            <Link href='/'><MoveLeft />Volver atrás</Link>
           </Button>
         </div>
-        <div className="py-6 max-w-4xl ">
+        <div className="py-6 max-w-4xl items-start flex justify-start w-full">
           <div className="flex gap-4">
             <StepIndicator
               currentStep={currentIndex + 1}
@@ -46,10 +72,11 @@ export default function CreatedPrompt() {
         <div className="max-w-4xl flex flex-col ">
           <form className=" max-w-fit" action={getDataPrompt}>
             {methods.when("step-1", () => <Task />)}
-            {methods.when("step-2", () => <InputOutput />)}
-            {methods.when("step-3", () => <FormatExit />)}
-            {methods.when("step-4", () => <StyleAndTone />)}
-            {methods.when("step-5", () => <Settings />)}
+            {methods.when("step-2", () => <Context />)}
+            {methods.when("step-3", () => <InputOutput />)}
+            {methods.when("step-4", () => <FormatExit />)}
+            {methods.when("step-5", () => <StyleAndTone />)}
+            {methods.when("step-6", () => <Settings />)}
 
             {
               methods.isLast === false ? (
@@ -61,14 +88,18 @@ export default function CreatedPrompt() {
                       onClick={methods.prev}
                       disabled={methods.isFirst}
                     >
-                      Previous
+                      Anterior
                     </Button>
                   )}
                   <Button size={"lg"} onClick={methods.isLast ? methods.reset : methods.next} type="submit">
-                    {methods.isLast ? "Reset" : "Next"}
+                    {methods.isLast ? "Restablecer" : "Siguiente"}
                   </Button>
                 </div>
-              ) : <Button size={"lg"} onClick={() => console.log("info")}>Crear prompt</Button>
+              ) : (
+                <div className="flex justify-end w-full mt-10">
+                  <Button size={"lg"} onClick={() => console.log("info")}>Crear prompt</Button>
+                </div>
+              )
             }
           </form>
         </div>
@@ -131,7 +162,7 @@ const StepIndicator = ({
 }
 
 
-const Text = ({ text }: { text: string }) => <h2 className="flex-1 text-2xl font-semibold text-gray-800">{text}</h2>
+const Text = ({ text }: { text: string }) => <h2 className="flex-1 text-lg text-gray-800 font-sans">{text}</h2>
 
 // Componente aparte:
 interface ObjectiveSummaryExampleProps {
@@ -151,12 +182,12 @@ const ObjectiveSummaryExample = ({
   <label className="
     has-checked:ring-primary
     has-checked:ring-2 ring ring-neutral-300
-    flex text-base p-4 rounded-3xl justify-between
+    flex text-base p-6 rounded-3xl justify-between
     hover:bg-neutral-50 select-none">
     <span>
-      <span className="block font-bold font-sans">
+      <span className="block text-lg font-sans">
         {label}
-        <span className="mt-1 block text-sm font-light">
+        <span className="mt-1 block text-sm text-neutral-500">
           {description}
         </span>
       </span>
@@ -170,6 +201,51 @@ const ObjectiveSummaryExample = ({
   </label>
 )
 
+const Context = () => {
+  return (
+    <div>
+      <textarea
+        id="context"
+        name="context" rows={3} required
+        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        placeholder="Ej: El cliente 'Tech Solutions Inc.' asistió a nuestro webinar sobre 'IA en Marketing' la semana pasada y expresó interés en nuestro producto 'AnalyticPro'. El objetivo del email es agendar una demo."></textarea>
+
+      <div className="mt-4 space-y-2">
+        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
+          <ObjectiveSummaryExample
+            name="examples"
+            value="Entrada: 'Resume el siguiente texto sobre cambio climático manteniendo viñetas y sin opiniones personales.' Salida: '- Aumento de temperatura global\n- Derretimiento de glaciares\n- Impacto en ecosistemas'"
+            label="Resumen con formato y restricción de opinión"
+            description="Entrada y salida para resumen objetivo con formato de viñetas y sin opiniones personales."
+          />
+
+          <ObjectiveSummaryExample
+            name="examples"
+            value="Entrada: 'Clasifica las siguientes reseñas en positivo, negativo o neutral y explica tu elección.' Salida: 'Positivo: La calidad es excelente porque...'"
+            label="Clasificación de sentimiento con justificación"
+            description="Entrada y salida para clasificación de sentimiento con explicación."
+          />
+
+          <ObjectiveSummaryExample
+            name="examples"
+            value=""
+            label="Generación de código con docstring y prueba"
+            description="Entrada y salida para generación de código documentado y con prueba unitaria."
+          />
+
+          <ObjectiveSummaryExample
+            name="examples"
+            value="Entrada: 'Crea una tabla de indicadores de rendimiento (KPI) para un proyecto de marketing.' Salida: 'Tabla KPI | Descripción | Meta'"
+            label="Estructura tabular de KPIs"
+            description="Entrada y salida para generación de tabla de KPIs."
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const Task = () => {
   return (
     <div>
@@ -177,10 +253,10 @@ const Task = () => {
         id="objective"
         name="objective" rows={3} required
         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-        placeholder="Describe la acción o resultado deseado..."></textarea>
+        placeholder="Ej: Redactar un email de seguimiento a un cliente."></textarea>
 
       <div className="mt-4 space-y-2">
-        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo de objetivo:</span>
+        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
           <ObjectiveSummaryExample
             name="objectiveExample"
@@ -219,34 +295,43 @@ const Task = () => {
 const InputOutput = () => {
   return (
     <div>
-      <Text text="2. Selecciona un ejemplo de entrada y salida deseada:" />
-      <div className="space-y-4 ml-4">
-        <label className="block">
-          <input type="radio" name="examples" value="Entrada: 'Resume el siguiente texto sobre cambio climático manteniendo viñetas y sin opiniones personales.' Salida: '- Aumento de temperatura global\n- Derretimiento de glaciares\n- Impacto en ecosistemas'" required className="form-radio" />
-          <span className="ml-2">Ejemplo 1: Resumen con formato y restricción de opinión</span>
-        </label>
+      <textarea
+        id="objective"
+        name="objective" rows={3} required
+        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        placeholder="Ej: &#10;Entrada: Traduce 'Hola Mundo' al francés.&#10;Salida: Bonjour le monde.&#10;&#10;Entrada: Cliente pregunta por el estado de su pedido #123.&#10;Salida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea>
 
-        <label className="block">
-          <input type="radio" name="examples" value="Entrada: 'Clasifica las siguientes reseñas en positivo, negativo o neutral y explica tu elección.' Salida: 'Positivo: La calidad es excelente porque...'" className="form-radio" />
-          <span className="ml-2">Ejemplo 2: Clasificación de sentimiento con justificación</span>
-        </label>
+      <div className="mt-4 space-y-2">
+        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
+          <ObjectiveSummaryExample
+            name="examples"
+            value="Entrada: 'Resume el siguiente texto sobre cambio climático manteniendo viñetas y sin opiniones personales.' Salida: '- Aumento de temperatura global\n- Derretimiento de glaciares\n- Impacto en ecosistemas'"
+            label="Resumen con formato y restricción de opinión"
+            description="Entrada y salida para resumen objetivo con formato de viñetas y sin opiniones personales."
+          />
 
+          <ObjectiveSummaryExample
+            name="examples"
+            value="Entrada: 'Clasifica las siguientes reseñas en positivo, negativo o neutral y explica tu elección.' Salida: 'Positivo: La calidad es excelente porque...'"
+            label="Clasificación de sentimiento con justificación"
+            description="Entrada y salida para clasificación de sentimiento con explicación."
+          />
 
-        <label className="block">
-          <input type="radio" name="examples" value="" className="form-radio" />
-          <span className="ml-2">Ejemplo 3: Generación de código con docstring y prueba</span>
-        </label>
+          <ObjectiveSummaryExample
+            name="examples"
+            value=""
+            label="Generación de código con docstring y prueba"
+            description="Entrada y salida para generación de código documentado y con prueba unitaria."
+          />
 
-        <label className="block">
-          <input type="radio" name="examples" value="Entrada: 'Crea una tabla de indicadores de rendimiento (KPI) para un proyecto de marketing.' Salida: 'Tabla KPI | Descripción | Meta'" className="form-radio" />
-          <span className="ml-2">Ejemplo 4: Estructura tabular de KPIs</span>
-        </label>
-
-        <label className="block">
-          <input type="radio" name="examples" value="Otros" id="examplesOtherRadio" className="form-radio" />
-          <span className="ml-2">✏️ Otros</span>
-        </label>
-        <textarea id="examplesOtherInput" name="examplesOther" rows={3} placeholder="Escribe tu propio ejemplo detallado..." className="mt-2 w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 hidden"></textarea>
+          <ObjectiveSummaryExample
+            name="examples"
+            value="Entrada: 'Crea una tabla de indicadores de rendimiento (KPI) para un proyecto de marketing.' Salida: 'Tabla KPI | Descripción | Meta'"
+            label="Estructura tabular de KPIs"
+            description="Entrada y salida para generación de tabla de KPIs."
+          />
+        </div>
       </div>
     </div>
   )
@@ -254,28 +339,33 @@ const InputOutput = () => {
 
 const FormatExit = () => {
   return (
-    <div>
-      <Text text="3. ¿En qué formato deseas recibir la respuesta?" />
-      <div className="space-y-2 ml-4">
-        <label className="inline-flex items-center">
-          <input type="radio" name="format" value="JSON" required className="form-radio" />
-          <span className="ml-2">🗂️ JSON</span>
-        </label>
-
-        <label className="inline-flex items-center">
-          <input type="radio" name="format" value="Lista" className="form-radio" />
-          <span className="ml-2">📋 Lista</span>
-        </label>
-
-        <label className="inline-flex items-center">
-          <input type="radio" name="format" value="Párrafo" className="form-radio" />
-          <span className="ml-2">📄 Párrafo</span>
-        </label>
-
-        <label className="inline-flex items-center">
-          <input type="radio" name="format" value="Código" className="form-radio" />
-          <span className="ml-2">💻 Fragmento de código</span>
-        </label>
+    <div className="mt-4 space-y-2">
+      <span className="text-gray-600 block mb-3 mt-5">Seleccione el formato en el que desea recibir la respuesta</span>
+      <div className="grid md:grid-cols-4 grid-cols-1 gap-7">
+        <ObjectiveSummaryExample
+          name="format"
+          value="JSON"
+          label="🗂️ JSON"
+          description="Recibe la respuesta en formato JSON estructurado."
+        />
+        <ObjectiveSummaryExample
+          name="format"
+          value="Lista"
+          label="📋 Lista"
+          description="Recibe la respuesta como una lista de elementos."
+        />
+        <ObjectiveSummaryExample
+          name="format"
+          value="Párrafo"
+          label="📄 Párrafo"
+          description="Recibe la respuesta en formato de texto corrido o párrafo."
+        />
+        <ObjectiveSummaryExample
+          name="format"
+          value="Código"
+          label="💻 Fragmento de código"
+          description="Recibe la respuesta como un bloque de código."
+        />
       </div>
     </div>
   )
@@ -284,38 +374,46 @@ const FormatExit = () => {
 const StyleAndTone = () => {
   return (
     <div>
-      <Text text="4. ¿Qué estilo, tono o rol debe adoptar el modelo al generar la respuesta?" />
-      <div className="space-y-2 ml-4">
-        <label className="inline-flex items-center">
-          <input type="radio" name="style" value="Formal" required className="form-radio" />
-          <span className="ml-2">🎩 Formal</span>
-        </label>
+      <textarea
+        id="styleOtherInput"
+        name="styleOther" rows={3} required
+        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        placeholder="Especifica otro estilo..."></textarea>
 
-        <label className="inline-flex items-center">
-          <input type="radio" name="style" value="Humorístico" className="form-radio" />
-          <span className="ml-2">😂 Humorístico</span>
-        </label>
-
-        <label className="inline-flex items-center">
-          <input type="radio" name="style" value="Técnico experto" className="form-radio" />
-          <span className="ml-2">💻 Técnico experto</span>
-        </label>
-
-        <label className="inline-flex items-center">
-          <input type="radio" name="style" value="Resumido" className="form-radio" />
-          <span className="ml-2">📝 Resumido</span>
-        </label>
-
-        <label className="inline-flex items-center">
-          <input type="radio" name="style" value="Detallado" className="form-radio" />
-          <span className="ml-2">🔍 Detallado</span>
-        </label>
-
-        <label className="inline-flex items-center">
-          <input type="radio" name="style" value="Otros" id="styleOtherRadio" className="form-radio" />
-          <span className="ml-2">✏️ Otros</span>
-        </label>
-        <input type="text" id="styleOtherInput" name="styleOther" placeholder="Especifica otro estilo..." className="mt-2 w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 hidden" />
+      <div className="mt-4 space-y-2">
+        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
+          <ObjectiveSummaryExample
+            name="style"
+            value="Formal"
+            label="Formal"
+            description="Utiliza un lenguaje profesional, serio y estructurado, adecuado para contextos académicos o de negocios."
+          />
+          <ObjectiveSummaryExample
+            name="style"
+            value="Humorístico"
+            label="Humorístico"
+            description="Emplea un tono divertido y ligero, incorporando humor para hacer la respuesta más amena."
+          />
+          <ObjectiveSummaryExample
+            name="style"
+            value="Técnico experto"
+            label="Técnico experto"
+            description="Redacta la respuesta con precisión técnica y vocabulario especializado, como lo haría un profesional del área."
+          />
+          <ObjectiveSummaryExample
+            name="style"
+            value="Resumido"
+            label="Resumido"
+            description="Presenta la información de manera breve y concisa, enfocándose solo en los puntos clave."
+          />
+          <ObjectiveSummaryExample
+            name="style"
+            value="Detallado"
+            label="Detallado"
+            description="Ofrece una explicación extensa y minuciosa, cubriendo todos los aspectos relevantes del tema."
+          />
+        </div>
       </div>
     </div>
   )
@@ -324,109 +422,40 @@ const StyleAndTone = () => {
 const Settings = () => {
   return (
     <div>
-      <Text text=" 5. ¿Qué configuraciones o restricciones adicionales quieres aplicar?" />
-      <div className="space-y-4 ml-4">
-        <label className="block">
-          <input
-            type="radio"
+      <div className="mt-4  p-6 rounded-3xl ring ring-neutral-300">
+        <label htmlFor="tokenRange" className="block text-sm font-medium text-gray-700">
+          Número máximo de tokens:{" "}
+          <span id="tokenValue" className="font-semibold">100</span>
+        </label>
+        <input type="range" id="tokenRange" name="tokenRange" min="10" max="500" step="10" defaultValue="100" className="w-full accent-primary" />
+      </div>
+      <div className="mt-4  p-6 rounded-3xl ring ring-neutral-300">
+        <label htmlFor="tempRange" className="block text-sm font-medium text-gray-700">
+          Temperatura:{" "}
+          <span id="tempValue" className="font-semibold">0.7</span>
+        </label>
+        <input type="range" id="tempRange" name="tempRange" min="0" max="1" step="0.01" defaultValue="0.7" className="w-full accent-primary" />
+      </div>
+
+      <div className="mt-4 space-y-2">
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
+          <ObjectiveSummaryExample
             name="settings"
             value="Tokens máximo: 100, Temperatura: 0.7"
-            required
-            className="form-radio"
+            label="Tokens máximo: 100, Temperatura: 0.7"
+            description="Conciso y creativo moderado."
           />
-          <span className="ml-2 font-medium">
-            Tokens máximo: 100, Temperatura: 0.7
-          </span>
-        </label>
-        <p className="ml-8 text-sm text-gray-500">
-          Conciso y creativo moderado.
-        </p>
-        <label className="block">
-          <input
-            type="radio"
+          <ObjectiveSummaryExample
             name="settings"
             value="Tokens máximo: 200, Temperatura: 0.3"
-            className="form-radio"
+            label="Tokens máximo: 200, Temperatura: 0.3"
+            description="Más largo y preciso, menos creativo."
           />
-          <span className="ml-2 font-medium">
-            Tokens máximo: 200, Temperatura: 0.3
-          </span>
-        </label>
-        <p className="ml-8 text-sm text-gray-500">
-          Más largo y preciso, menos creativo.
-        </p>
-        <label className="block">
-          <input
-            type="radio"
+          <ObjectiveSummaryExample
             name="settings"
             value="Tokens máximo: 50, Temperatura: 1.0"
-            className="form-radio"
-          />
-          <span className="ml-2 font-medium">
-            Tokens máximo: 50, Temperatura: 1.0
-          </span>
-        </label>
-        <p className="ml-8 text-sm text-gray-500">
-          Muy creativo, posible incoherencia.
-        </p>
-        <label className="block">
-          <input
-            type="radio"
-            name="settings"
-            value="Otros"
-            id="settingsOtherRadio"
-            className="form-radio"
-          />
-          <span className="ml-2">✏️ Otros</span>
-        </label>
-        <textarea
-          id="settingsOtherInput"
-          name="settingsOther"
-          rows={2}
-          placeholder="Especifica otras configuraciones..."
-          className="mt-2 w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 hidden"
-        ></textarea>
-        {/* Sliders para tokens y temperatura */}
-        <div className="mt-4 ml-4">
-          <label
-            htmlFor="tokenRange"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Número máximo de tokens:{" "}
-            <span id="tokenValue" className="font-semibold">
-              100
-            </span>
-          </label>
-          <input
-            type="range"
-            id="tokenRange"
-            name="tokenRange"
-            min="10"
-            max="500"
-            step="10"
-            defaultValue="100"
-            className="w-full"
-          />
-        </div>
-        <div className="mt-4 ml-4">
-          <label
-            htmlFor="tempRange"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Temperatura:{" "}
-            <span id="tempValue" className="font-semibold">
-              0.7
-            </span>
-          </label>
-          <input
-            type="range"
-            id="tempRange"
-            name="tempRange"
-            min="0"
-            max="1"
-            step="0.01"
-            defaultValue="0.7"
-            className="w-full"
+            label="Tokens máximo: 50, Temperatura: 1.0"
+            description="Muy creativo, posible incoherencia."
           />
         </div>
       </div>
