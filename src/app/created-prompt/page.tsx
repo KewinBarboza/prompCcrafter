@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { defineStepper } from "@stepperize/react"
 import { MoveLeft } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
 
 const { useStepper, utils } = defineStepper(
   {
@@ -38,11 +39,44 @@ const { useStepper, utils } = defineStepper(
   },
 )
 
+// Utilidad para sincronizar radio y textarea
+function handleRadioToTextarea(e: React.ChangeEvent<HTMLInputElement>) {
+  const { name, value } = e.target
+  // Busca el textarea relacionado por name
+  const textarea = document.querySelector(`textarea[name='${name}']`) as HTMLTextAreaElement
+  if (textarea) {
+    textarea.value = value
+    textarea.dispatchEvent(new Event('input', { bubbles: true }))
+  }
+}
+
 export default function CreatedPrompt() {
   const methods = useStepper()
+  const [formData, setFormData] = useState({
+    objective: "",
+    context: "",
+    inputOutput: "",
+    format: "",
+    style: "",
+    settings: {
+      tokenRange: 100,
+      tempRange: 0.7
+    }
+  })
 
-  const getDataPrompt = (formData: FormData) => {
-    console.log(formData.get("objective"))
+  const getDataPrompt = (e) => {
+    e.preventDefault()
+    const { name, value } = e.target
+    console.log(formData)
+  }
+
+  const handleChange = (e) => {
+    console.log(e.target.value)
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value
+    }))
   }
 
   const currentIndex = utils.getIndex(methods.current.id)
@@ -70,8 +104,8 @@ export default function CreatedPrompt() {
           </div>
         </div>
         <div className="max-w-4xl flex flex-col ">
-          <form className=" max-w-fit" action={getDataPrompt}>
-            {methods.when("step-1", () => <Task />)}
+          <form className=" max-w-fit" onSubmit={getDataPrompt}>
+            {methods.when("step-1", () => <Task handleChange={handleChange} />)}
             {methods.when("step-2", () => <Context />)}
             {methods.when("step-3", () => <InputOutput />)}
             {methods.when("step-4", () => <FormatExit />)}
@@ -177,7 +211,7 @@ const ObjectiveSummaryExample = ({
   label,
   description,
   value,
-  name = "objectiveExample",
+  name,
 }: ObjectiveSummaryExampleProps) => (
   <label className="
     has-checked:ring-primary
@@ -197,61 +231,19 @@ const ObjectiveSummaryExample = ({
       name={name}
       value={value}
       hidden
+      onChange={handleRadioToTextarea}
     />
   </label>
 )
 
-const Context = () => {
+const Task = ({ handleChange }) => {
   return (
     <div>
       <textarea
-        id="context"
-        name="context" rows={3} required
-        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-        placeholder="Ej: El cliente 'Tech Solutions Inc.' asistió a nuestro webinar sobre 'IA en Marketing' la semana pasada y expresó interés en nuestro producto 'AnalyticPro'. El objetivo del email es agendar una demo."></textarea>
-
-      <div className="mt-4 space-y-2">
-        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
-        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
-          <ObjectiveSummaryExample
-            name="examples"
-            value="Entrada: 'Resume el siguiente texto sobre cambio climático manteniendo viñetas y sin opiniones personales.' Salida: '- Aumento de temperatura global\n- Derretimiento de glaciares\n- Impacto en ecosistemas'"
-            label="Resumen con formato y restricción de opinión"
-            description="Entrada y salida para resumen objetivo con formato de viñetas y sin opiniones personales."
-          />
-
-          <ObjectiveSummaryExample
-            name="examples"
-            value="Entrada: 'Clasifica las siguientes reseñas en positivo, negativo o neutral y explica tu elección.' Salida: 'Positivo: La calidad es excelente porque...'"
-            label="Clasificación de sentimiento con justificación"
-            description="Entrada y salida para clasificación de sentimiento con explicación."
-          />
-
-          <ObjectiveSummaryExample
-            name="examples"
-            value=""
-            label="Generación de código con docstring y prueba"
-            description="Entrada y salida para generación de código documentado y con prueba unitaria."
-          />
-
-          <ObjectiveSummaryExample
-            name="examples"
-            value="Entrada: 'Crea una tabla de indicadores de rendimiento (KPI) para un proyecto de marketing.' Salida: 'Tabla KPI | Descripción | Meta'"
-            label="Estructura tabular de KPIs"
-            description="Entrada y salida para generación de tabla de KPIs."
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const Task = () => {
-  return (
-    <div>
-      <textarea
-        id="objective"
-        name="objective" rows={3} required
+        // onChange={(e) => console.log(e.target.value)}
+        onInput={handleChange}
+        name="objective"
+        rows={3} required
         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
         placeholder="Ej: Redactar un email de seguimiento a un cliente."></textarea>
 
@@ -259,32 +251,73 @@ const Task = () => {
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
           <ObjectiveSummaryExample
-            name="objectiveExample"
-            value="Resume el siguiente texto explicando solo los puntos clave sin agregar opiniones personales."
+            name="objective"
+            value="Resume un texto explicando solo los puntos clave sin agregar opiniones personales."
             label="Resumen objetivo"
             description="Resume un texto sin agregar opiniones, manteniendo claridad."
-            icon="📝"
           />
           <ObjectiveSummaryExample
-            name="objectiveExample"
+            name="objective"
             value="Clasifica reseñas en positivas, negativas o neutrales y explica brevemente por qué."
             label="Clasificación de sentimiento"
             description="Categoriza y justifica reseñas de usuarios."
-            icon="🔍"
           />
           <ObjectiveSummaryExample
-            name="objectiveExample"
+            name="objective"
             value="Genera una función en Python documentada y con prueba unitaria que invierta una cadena."
             label="Código con test"
             description="Crear función funcional y bien documentada."
-            icon="💻"
           />
           <ObjectiveSummaryExample
-            name="objectiveExample"
+            name="objective"
             value="Crea una tabla con los principales indicadores de rendimiento de marketing y sus metas."
             label="Tabla de KPIs"
             description="Representar KPIs con claridad en formato tabular."
-            icon="📊"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const Context = () => {
+  return (
+    <div>
+      {/* <textarea
+        name="context"
+        rows={3} required
+        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        placeholder="Ej: El cliente 'Tech Solutions Inc.' asistió a nuestro webinar sobre 'IA en Marketing' la semana pasada y expresó interés en nuestro producto 'AnalyticPro'. El objetivo del email es agendar una demo."></textarea> */}
+
+      <div className="mt-4 space-y-2">
+        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
+        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
+          <ObjectiveSummaryExample
+            name="context"
+            value="Email Marketing (Startup Tecnológica): Somos una startup de tecnología educativa a punto de lanzar 'LinguaBoost'. Queremos anunciar el lanzamiento (15 de junio), destacar características (aprendizaje adaptativo, personajes interactivos) y ofrecer descuento del 20%."
+            label="Email Marketing"
+            description="Email Marketing (Startup Tecnológica): Somos una startup de tecnología educativa a punto de lanzar 'LinguaBoost'. Queremos anunciar el lanzamiento (15 de junio), destacar características (aprendizaje adaptativo, personajes interactivos) y ofrecer descuento del 20%."
+          />
+
+          <ObjectiveSummaryExample
+            name="context"
+            value="E-commerce (Zapatillas Running): Descripción para 'Velocity Pro' de 'RunFast'. Para maratonistas, suela de carbono, upper ligero, peso 210g, drop 8mm. Transmitir velocidad y tecnología."
+            label="E-commerce"
+            description="E-commerce (Zapatillas Running): Descripción para 'Velocity Pro' de 'RunFast'. Para maratonistas, suela de carbono, upper ligero, peso 210g, drop 8mm. Transmitir velocidad y tecnología."
+          />
+
+          <ObjectiveSummaryExample
+            name="context"
+            value="Video Explicativo (Herramienta SaaS): Guion para 'TaskMaster' (gestión de proyectos). Integración con calendarios, colaboración real, notificaciones. Para freelancers y PYMEs. Llamada a acción: prueba gratuita 14 días."
+            label="Video Explicativo"
+            description="Video Explicativo (Herramienta SaaS): Guion para 'TaskMaster' (gestión de proyectos). Integración con calendarios, colaboración real, notificaciones. Para freelancers y PYMEs. Llamada a acción: prueba gratuita 14 días."
+          />
+
+          <ObjectiveSummaryExample
+            name="context"
+            value="Redes Sociales (Nutricionista): Plan de contenidos para Instagram (junio). Dietas plant-based. Pilares: recetas veganas, mitos nutrición, mindfulness, transición a plant-based. Audiencia: mujeres 25-45 años."
+            label="Redes Sociales"
+            description="Redes Sociales (Nutricionista): Plan de contenidos para Instagram (junio). Dietas plant-based. Pilares: recetas veganas, mitos nutrición, mindfulness, transición a plant-based. Audiencia: mujeres 25-45 años."
           />
         </div>
       </div>
@@ -295,38 +328,37 @@ const Task = () => {
 const InputOutput = () => {
   return (
     <div>
-      <textarea
-        id="objective"
-        name="objective" rows={3} required
+      {/* <textarea
+        name="inputOutput" rows={3} required
         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-        placeholder="Ej: &#10;Entrada: Traduce 'Hola Mundo' al francés.&#10;Salida: Bonjour le monde.&#10;&#10;Entrada: Cliente pregunta por el estado de su pedido #123.&#10;Salida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea>
+        placeholder="Ej: \nEntrada: Traduce 'Hola Mundo' al francés.\nSalida: Bonjour le monde.\n\nEntrada: Cliente pregunta por el estado de su pedido #123.\nSalida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea> */}
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
           <ObjectiveSummaryExample
-            name="examples"
+            name="inputOutput"
             value="Entrada: 'Resume el siguiente texto sobre cambio climático manteniendo viñetas y sin opiniones personales.' Salida: '- Aumento de temperatura global\n- Derretimiento de glaciares\n- Impacto en ecosistemas'"
             label="Resumen con formato y restricción de opinión"
             description="Entrada y salida para resumen objetivo con formato de viñetas y sin opiniones personales."
           />
 
           <ObjectiveSummaryExample
-            name="examples"
+            name="inputOutput"
             value="Entrada: 'Clasifica las siguientes reseñas en positivo, negativo o neutral y explica tu elección.' Salida: 'Positivo: La calidad es excelente porque...'"
             label="Clasificación de sentimiento con justificación"
             description="Entrada y salida para clasificación de sentimiento con explicación."
           />
 
           <ObjectiveSummaryExample
-            name="examples"
+            name="inputOutput"
             value=""
             label="Generación de código con docstring y prueba"
             description="Entrada y salida para generación de código documentado y con prueba unitaria."
           />
 
           <ObjectiveSummaryExample
-            name="examples"
+            name="inputOutput"
             value="Entrada: 'Crea una tabla de indicadores de rendimiento (KPI) para un proyecto de marketing.' Salida: 'Tabla KPI | Descripción | Meta'"
             label="Estructura tabular de KPIs"
             description="Entrada y salida para generación de tabla de KPIs."
@@ -374,42 +406,41 @@ const FormatExit = () => {
 const StyleAndTone = () => {
   return (
     <div>
-      <textarea
-        id="styleOtherInput"
-        name="styleOther" rows={3} required
+      {/* <textarea
+        name="style" rows={3} required
         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-        placeholder="Especifica otro estilo..."></textarea>
+        placeholder="Especifica otro estilo..."></textarea> */}
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
           <ObjectiveSummaryExample
             name="style"
-            value="Formal"
+            value="Utiliza un lenguaje profesional, serio y estructurado, adecuado para contextos académicos o de negocios."
             label="Formal"
             description="Utiliza un lenguaje profesional, serio y estructurado, adecuado para contextos académicos o de negocios."
           />
           <ObjectiveSummaryExample
             name="style"
-            value="Humorístico"
+            value="Emplea un tono divertido y ligero, incorporando humor para hacer la respuesta más amena."
             label="Humorístico"
             description="Emplea un tono divertido y ligero, incorporando humor para hacer la respuesta más amena."
           />
           <ObjectiveSummaryExample
             name="style"
-            value="Técnico experto"
+            value="Redacta la respuesta con precisión técnica y vocabulario especializado, como lo haría un profesional del área."
             label="Técnico experto"
             description="Redacta la respuesta con precisión técnica y vocabulario especializado, como lo haría un profesional del área."
           />
           <ObjectiveSummaryExample
             name="style"
-            value="Resumido"
+            value="Presenta la información de manera breve y concisa, enfocándose solo en los puntos clave."
             label="Resumido"
             description="Presenta la información de manera breve y concisa, enfocándose solo en los puntos clave."
           />
           <ObjectiveSummaryExample
             name="style"
-            value="Detallado"
+            value="Ofrece una explicación extensa y minuciosa, cubriendo todos los aspectos relevantes del tema."
             label="Detallado"
             description="Ofrece una explicación extensa y minuciosa, cubriendo todos los aspectos relevantes del tema."
           />
