@@ -67,11 +67,69 @@ export default function CreatedPrompt() {
   const getDataPrompt = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()
     // const { name, value } = e.target
-    console.log(formData)
+
+    //     const promptMaster = `Eres un experto en Prompt Engineering. A partir de la siguiente información proporcionada por el usuario:
+    // - Objetivo de la tarea: ${formData.objective}
+    // - Ejemplos de entrada/salida: ${formData.inputOutput}
+    // - Formato de salida deseado: ${formData.format}
+    // - Estilo/tono/rol: ${formData.style}
+    // - Parámetros de sampling y límite de tokens: Tokens = ${formData.settings.tokenRange}, Temperatura = ${formData.settings.tempRange}
+
+    // Aplica estas cinco mejores prácticas:
+    // 1. Define claramente el propósito en cada prompt.
+    // 2. Usa one-shot o few-shot con ejemplos representativos si es pertinente.
+    // 3. Sé específico respecto al formato de respuesta (JSON, lista, párrafo, código…).
+    // 4. Asigna un rol o tono que guíe la agresividad o formalidad del lenguaje.
+    // 5. Ajusta temperatura y tokens para balancear creatividad y coherencia.
+
+    // Con toda esta información, genera **tres prompts distintos y listos para usar**, numerados del 1 al 3. Cada prompt debe ser auto-contenible (no dependiente del contexto) y seguir fielmente las prácticas anteriores.
+    // `
+
+    const promptMaster = `Eres un “Generador de Prompts Inteligente” especializado en Prompt Engineering. Tu misión es, a partir de los datos proporcionados por el usuario, diseñar **tres prompts distintos y optimizados con las mejores practicas** para ser usados directamente en alguna IA como gemini, ChatGPT, Copilot.
+
+- Objetivo de la tarea:
+  > ${formData.objective}
+- Ejemplos de entrada/salida (one-shot o few-shot):
+  > ${formData.inputOutput}
+- Formato de salida solicitado:
+  > ${formData.format}
+- Estilo, tono o rol deseado:
+  > ${formData.style}
+- Parámetros de sampling:
+  > Tokens máximos = ${formData.settings.tokenRange}, Temperatura = ${formData.settings.tempRange}
+- Contexto adicional:
+  > ${formData.context}
+
+---
+
+## Instrucciones para generar los prompts
+
+1. **Definición clara del propósito**
+   Cada prompt debe comenzar con una instrucción breve que explique la tarea principal de forma inequívoca y precisa.
+
+2. **Uso de ejemplos (few-shot)**
+   Si el usuario ha proporcionado ejemplos, inclúyelos de forma concisa para guiar al modelo hacia el patrón de respuesta correcto.
+
+3. **Especificidad de formato**
+   El formato de salida debe ser como lo indica el usuario ya sea como (JSON, lista, párrafo, código), incluyendo límites de longitud o estructura (p.ej., “máximo 5 viñetas”).
+
+4. **Asignación de rol/tono**
+   Cada prompt debe incluir un “Actúa como…” (p.ej., “Actúa como un analista financiero” o “Como un tutor universitario”).
+
+6. **Validación previa**
+   Reconfirma que entiendes todas las instrucciones antes de generar las respuestas.
+
+---
+
+## Salida esperada
+
+Devuélveme un bloque numerado de **3 prompts** completos, listos para usar, con la siguiente estructura:`
+
+    console.log(promptMaster)
+
   }
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -108,7 +166,7 @@ export default function CreatedPrompt() {
             {methods.when("step-1", () => <Task handleChange={handleChange} />)}
             {methods.when("step-2", () => <Context handleChange={handleChange} />)}
             {methods.when("step-3", () => <InputOutput handleChange={handleChange} />)}
-            {methods.when("step-4", () => <FormatExit />)}
+            {methods.when("step-4", () => <FormatExit handleChange={handleChange} />)}
             {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} />)}
             {methods.when("step-6", () => <Settings />)}
 
@@ -136,6 +194,12 @@ export default function CreatedPrompt() {
               )
             }
           </form>
+
+          <pre>
+            <code className="text-sm text-gray-500">
+              {JSON.stringify(formData, null, 2)}
+            </code>
+          </pre>
         </div>
       </section>
     </>
