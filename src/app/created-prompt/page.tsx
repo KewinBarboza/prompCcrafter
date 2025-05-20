@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { defineStepper } from "@stepperize/react"
 import { MoveLeft } from "lucide-react"
 import Link from "next/link"
-import { useState } from "react"
+import { ChangeEvent, FormEventHandler, useState } from "react"
 
 const { useStepper, utils } = defineStepper(
   {
@@ -64,14 +64,14 @@ export default function CreatedPrompt() {
     }
   })
 
-  const getDataPrompt = (e) => {
+  const getDataPrompt = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const { name, value } = e.target
+    // const { name, value } = e.target
     console.log(formData)
   }
 
-  const handleChange = (e) => {
-    console.log(e.target.value)
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -106,10 +106,10 @@ export default function CreatedPrompt() {
         <div className="max-w-4xl flex flex-col ">
           <form className=" max-w-fit" onSubmit={getDataPrompt}>
             {methods.when("step-1", () => <Task handleChange={handleChange} />)}
-            {methods.when("step-2", () => <Context />)}
-            {methods.when("step-3", () => <InputOutput />)}
+            {methods.when("step-2", () => <Context handleChange={handleChange} />)}
+            {methods.when("step-3", () => <InputOutput handleChange={handleChange} />)}
             {methods.when("step-4", () => <FormatExit />)}
-            {methods.when("step-5", () => <StyleAndTone />)}
+            {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} />)}
             {methods.when("step-6", () => <Settings />)}
 
             {
@@ -236,11 +236,10 @@ const ObjectiveSummaryExample = ({
   </label>
 )
 
-const Task = ({ handleChange }) => {
+const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement> }) => {
   return (
     <div>
       <textarea
-        // onChange={(e) => console.log(e.target.value)}
         onInput={handleChange}
         name="objective"
         rows={3} required
@@ -280,14 +279,15 @@ const Task = ({ handleChange }) => {
   )
 }
 
-const Context = () => {
+const Context = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement> }) => {
   return (
     <div>
-      {/* <textarea
+      <textarea
         name="context"
+        onInput={handleChange}
         rows={3} required
         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-        placeholder="Ej: El cliente 'Tech Solutions Inc.' asistió a nuestro webinar sobre 'IA en Marketing' la semana pasada y expresó interés en nuestro producto 'AnalyticPro'. El objetivo del email es agendar una demo."></textarea> */}
+        placeholder="Ej: El cliente 'Tech Solutions Inc.' asistió a nuestro webinar sobre 'IA en Marketing' la semana pasada y expresó interés en nuestro producto 'AnalyticPro'. El objetivo del email es agendar una demo."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
@@ -325,13 +325,14 @@ const Context = () => {
   )
 }
 
-const InputOutput = () => {
+const InputOutput = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement> }) => {
   return (
     <div>
-      {/* <textarea
+      <textarea
         name="inputOutput" rows={3} required
+        onInput={handleChange}
         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-        placeholder="Ej: \nEntrada: Traduce 'Hola Mundo' al francés.\nSalida: Bonjour le monde.\n\nEntrada: Cliente pregunta por el estado de su pedido #123.\nSalida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea> */}
+        placeholder="Ej: \nEntrada: Traduce 'Hola Mundo' al francés.\nSalida: Bonjour le monde.\n\nEntrada: Cliente pregunta por el estado de su pedido #123.\nSalida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
@@ -369,47 +370,56 @@ const InputOutput = () => {
   )
 }
 
-const FormatExit = () => {
+const FormatExit = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement> }) => {
   return (
-    <div className="mt-4 space-y-2">
-      <span className="text-gray-600 block mb-3 mt-5">Seleccione el formato en el que desea recibir la respuesta</span>
-      <div className="grid md:grid-cols-4 grid-cols-1 gap-7">
-        <ObjectiveSummaryExample
-          name="format"
-          value="JSON"
-          label="🗂️ JSON"
-          description="Recibe la respuesta en formato JSON estructurado."
-        />
-        <ObjectiveSummaryExample
-          name="format"
-          value="Lista"
-          label="📋 Lista"
-          description="Recibe la respuesta como una lista de elementos."
-        />
-        <ObjectiveSummaryExample
-          name="format"
-          value="Párrafo"
-          label="📄 Párrafo"
-          description="Recibe la respuesta en formato de texto corrido o párrafo."
-        />
-        <ObjectiveSummaryExample
-          name="format"
-          value="Código"
-          label="💻 Fragmento de código"
-          description="Recibe la respuesta como un bloque de código."
-        />
+    <div>
+      <textarea
+        name="format"
+        rows={3} required
+        onInput={handleChange}
+        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        placeholder="Ej: JSON, Lista, Párrafo, Código"></textarea>
+      <div className="mt-4 space-y-2">
+        <span className="text-gray-600 block mb-3 mt-5">Seleccione el formato en el que desea recibir la respuesta</span>
+        <div className="grid md:grid-cols-4 grid-cols-1 gap-7">
+          <ObjectiveSummaryExample
+            name="format"
+            value="JSON"
+            label="🗂️ JSON"
+            description="Recibe la respuesta en formato JSON estructurado."
+          />
+          <ObjectiveSummaryExample
+            name="format"
+            value="Lista"
+            label="📋 Lista"
+            description="Recibe la respuesta como una lista de elementos."
+          />
+          <ObjectiveSummaryExample
+            name="format"
+            value="Párrafo"
+            label="📄 Párrafo"
+            description="Recibe la respuesta en formato de texto corrido o párrafo."
+          />
+          <ObjectiveSummaryExample
+            name="format"
+            value="Código"
+            label="💻 Fragmento de código"
+            description="Recibe la respuesta como un bloque de código."
+          />
+        </div>
       </div>
     </div>
   )
 }
 
-const StyleAndTone = () => {
+const StyleAndTone = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement> }) => {
   return (
     <div>
-      {/* <textarea
+      <textarea
+        onInput={handleChange}
         name="style" rows={3} required
         className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
-        placeholder="Especifica otro estilo..."></textarea> */}
+        placeholder="Especifica otro estilo..."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
