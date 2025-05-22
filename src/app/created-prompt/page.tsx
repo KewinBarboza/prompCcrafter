@@ -4,7 +4,7 @@ import { ObjectiveSummaryExample } from "@/components/form/radio"
 import { StepIndicator } from "@/components/step-indicator"
 import { Button } from "@/components/ui/button"
 import { defineStepper } from "@stepperize/react"
-import { MoveLeft } from "lucide-react"
+import { ArrowRightToLine, Copy, MoveLeft, Save } from "lucide-react"
 import Link from "next/link"
 import { ChangeEvent, FormEventHandler, useState } from "react"
 import { Text } from "@/components/text"
@@ -39,11 +39,6 @@ const { useStepper, utils } = defineStepper({
     id: "step-6",
     title: "6. ¿Qué configuraciones o restricciones adicionales quieres aplicar?",
     description: "Third step"
-  },
-  {
-    id: "complete",
-    title: "¡Listo!",
-    description: "Has completado todos los pasos. Ahora puedes seleccionar el prompt que deseas utilizar. Puedes editarlo si lo deseas. en el editor"
   })
 
 // Utilidad para sincronizar radio y textarea
@@ -61,6 +56,7 @@ export default function CreatedPrompt() {
   const methods = useStepper()
   const [prompts, setPrompts] = useState<{ name: string, prompt: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isComplete, setIsComplete] = useState(false)
   const [formData, setFormData] = useState({
     objective: "",
     context: "",
@@ -73,11 +69,15 @@ export default function CreatedPrompt() {
 
   const getDataPrompt = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()
-
+    setIsComplete(true)
     setIsLoading(true)
 
-    const prompt = promptMaster(formData)
 
+
+    const prompt = promptMaster(formData)
+    console.log('list ', formData)
+
+    setPrompts([])
     fetch("/api/prompt", {
       method: "POST",
       headers: {
@@ -89,15 +89,24 @@ export default function CreatedPrompt() {
         setPrompts(data.prompt)
       }).catch((error) => {
         console.error("Error:", error)
+        setIsComplete(false)
         setPrompts([])
       }).finally(() => {
         setIsLoading(false)
       })
-
   }
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target
+
+    if (name === "settings") {
+      const [tokens, tempValue] = value.split("-").map(Number)
+      setFormData((prev) => ({
+        ...prev,
+        tokenRange: tokens,
+        tempRange: tempValue
+      }))
+    }
 
     setFormData((prev) => ({
       ...prev,
@@ -115,64 +124,63 @@ export default function CreatedPrompt() {
             <Link href='/'><MoveLeft />Volver atrás</Link>
           </Button>
         </div>
-        <div className="py-6 max-w-4xl items-start flex justify-start w-full">
-          <div className="flex gap-4">
-            <StepIndicator
-              currentStep={currentIndex + 1}
-              totalSteps={methods.all.length}
-            />
-            <div className="flex flex-col">
-              <Text text={methods.current.title} />
-              <p className="text-sm text-muted-foreground">
-                {methods.current.description}
-              </p>
+        {isComplete === false ? (
+          <>
+            <div className="py-6 max-w-4xl items-start flex justify-start w-full">
+              <div className="flex gap-4">
+                <StepIndicator
+                  currentStep={currentIndex + 1}
+                  totalSteps={methods.all.length}
+                />
+                <div className="flex flex-col">
+                  <Text text={methods.current.title} />
+                  <p className="text-sm text-muted-foreground">
+                    {methods.current.description}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="max-w-4xl flex flex-col ">
-          <form className=" max-w-fit" onSubmit={getDataPrompt}>
-            {methods.when("step-1", () => <Task handleChange={handleChange} />)}
-            {methods.when("step-2", () => <Context handleChange={handleChange} />)}
-            {methods.when("step-3", () => <InputOutput handleChange={handleChange} />)}
-            {methods.when("step-4", () => <FormatExit handleChange={handleChange} />)}
-            {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} />)}
-            {methods.when("step-6", () => <Settings handleChange={handleChange} />)}
-            {methods.when("complete", () => isLoading ? (
+            <div className="max-w-4xl flex flex-col">
+              <form className="max-w-fit" onSubmit={getDataPrompt}>
+                {methods.when("step-1", () => <Task handleChange={handleChange} />)}
+                {methods.when("step-2", () => <Context handleChange={handleChange} />)}
+                {methods.when("step-3", () => <InputOutput handleChange={handleChange} />)}
+                {methods.when("step-4", () => <FormatExit handleChange={handleChange} />)}
+                {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} />)}
+                {methods.when("step-6", () => <Settings handleChange={handleChange} />)}
+
+                {
+                  methods.isLast === false ? (
+                    <div className="flex justify-between w-full mt-10">
+                      <Button
+                        variant="secondary"
+                        onClick={methods.prev}
+                        disabled={methods.isFirst}
+                      >
+                        Anterior
+                      </Button>
+                      <Button onClick={methods.next}>
+                        {methods.isLast ? 'Crear prompt' : 'Siguiente'}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-end w-full mt-10">
+                      <Button size={"lg"} type="submit">Crear prompt</Button>
+                    </div>
+                  )
+                }
+              </form>
+            </div>
+          </>
+        ) : (
+          isLoading ? (
+            <div className="max-w-4xl flex flex-col py-28 my-20">
               <div className="flex justify-center items-center w-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              </div>) : (<Complete prompts={prompts} />))}
+              </div>
+            </div>) : (<div className="max-w-4xl flex flex-col"><Complete prompts={prompts} /></div>)
+        )}
 
-            {
-              methods.isLast === false ? (
-                <div className="flex justify-between w-full mt-10">
-                  {!methods.isLast && (
-                    <Button
-                      size={"lg"}
-                      variant="secondary"
-                      onClick={methods.prev}
-                      disabled={methods.isFirst}
-                    >
-                      Anterior
-                    </Button>
-                  )}
-                  <Button size={"lg"} onClick={methods.isLast ? methods.reset : methods.next} type="submit">
-                    {methods.isLast ? "Restablecer" : "Siguiente"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex justify-end w-full mt-10">
-                  <Button size={"lg"} onClick={() => console.log("info")}>Crear prompt</Button>
-                </div>
-              )
-            }
-          </form>
-
-          <pre className="absolute top-10 right-10 p-4 bg-white rounded-lg shadow mt-4 min-w-2xl max-w-2xl">
-            <code className="text-sm text-gray-500">
-              {JSON.stringify(formData, null, 2)}
-            </code>
-          </pre>
-        </div>
       </section>
     </>
   )
@@ -426,17 +434,12 @@ const StyleAndTone = ({ handleChange }: { handleChange: FormEventHandler<HTMLTex
 const Settings = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
   const [token, setToken] = useState(100)
   const [temp, setTemp] = useState(0.7)
-  // Para actualizar el formData global, usa un custom event
-  // o levanta el estado a CreatedPrompt si necesitas sincronizar
 
-  // Si quieres actualizar el formData global, puedes usar un contexto o prop drilling
-  // Aquí solo se muestra el control local, pero puedes adaptarlo según tu arquitectura
-
-  // Maneja el cambio de los sliders
   const handleSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
     if (name === "settings") {
+      handleChange(e)
       const [tokens, tempValue] = value.split("-").map(Number)
       setToken(tokens)
       setTemp(tempValue)
@@ -444,16 +447,11 @@ const Settings = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAre
 
     if (name === "tokenRange") setToken(Number(value))
     if (name === "tempRange") setTemp(Number(value))
-    // Aquí deberías actualizar el formData global si es necesario
   }
 
-  // Maneja la selección de presets
-  const handlePreset = (tokens: number, tempValue: number, e: ChangeEvent<HTMLInputElement>) => {
-    // setToken(tokens)
-    // setTemp(tempValue)
+  const handlePreset = (e: ChangeEvent<HTMLInputElement>) => {
     handleSliderChange(e)
     handleChange(e)
-    // Aquí deberías actualizar el formData global si es necesario
   }
 
   return (
@@ -502,21 +500,21 @@ const Settings = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAre
             value="100-0.7"
             label="Tokens máximo: 100, Temperatura: 0.7"
             description="Conciso y creativo moderado."
-            handleRadioToTextarea={(e) => handlePreset(100, 0.7, e)}
+            handleRadioToTextarea={(e) => handlePreset(e)}
           />
           <ObjectiveSummaryExample
             name="settings"
             value="200-0.3"
-            label="200-0.3"
+            label="Tokens máximo: 200, Temperatura: 0.3"
             description="Más largo y preciso, menos creativo."
-            handleRadioToTextarea={(e) => handlePreset(200, 0.3, e)}
+            handleRadioToTextarea={(e) => handlePreset(e)}
           />
           <ObjectiveSummaryExample
             name="settings"
-            value="50,-1.0"
-            label="50,-1.0"
+            value="50-1.0"
+            label="Tokens máximo: 50, Temperatura: 1.0"
             description="Muy creativo, posible incoherencia."
-            handleRadioToTextarea={(e) => handlePreset(50, 1.0, e)}
+            handleRadioToTextarea={(e) => handlePreset(e)}
           />
         </div>
       </div>
@@ -525,6 +523,28 @@ const Settings = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAre
 }
 
 const Complete = ({ prompts }: { prompts: { name: string, prompt: string }[] }) => {
+  const [btnText, setBtnText] = useState("Copiar")
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        setBtnText("Texto copiado")
+        setTimeout(() => {
+          setBtnText("Copiar")
+        }, 2000)
+      })
+      .catch((err) => {
+        console.error("Error al copiar el texto: ", err)
+      })
+  }
+
+  if (prompts.length === 0) {
+    return (
+      <div className="flex justify-center items-center w-full">
+        <p className="text-lg text-gray-500">No se encontraron resultados.</p>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -533,6 +553,28 @@ const Complete = ({ prompts }: { prompts: { name: string, prompt: string }[] }) 
           <div key={index} className="p-4 border rounded-lg">
             <p>{prompt.name}</p>
             <p className="text-sm text-gray-500">{prompt.prompt}</p>
+
+            <div className="flex justify-end gap-x-2 mt-5">
+              <Button variant="outline" className="rounded-full" onClick={() => copyToClipboard(prompt.prompt)}>
+                <Copy className="ml-2" />
+                {btnText}
+              </Button>
+
+              <Button asChild variant="default" className="rounded-full">
+                <Link href={`/prompt/?prompt=${encodeURIComponent(prompt.prompt)}`}>
+                  <Save className="ml-2" />
+                  Editar prompt
+                </Link>
+
+              </Button>
+
+              <Button asChild variant="default" className="rounded-full">
+                <Link href={`https://chat.openai.com/?prompt=${encodeURIComponent(prompt.prompt)}`} target="_blank" rel="noopener noreferrer">
+                  <ArrowRightToLine className="ml-2" />
+                  Ir a ChatGpt
+                </Link>
+              </Button>
+            </div>
           </div>
         ))}
       </div>
