@@ -1,57 +1,30 @@
+"use client"
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
+  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Button } from "./ui/button"
+import { MoveLeft } from "lucide-react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ArrowBigLeft } from "lucide-react"
-
-const items = [
-  {
-    title: "Home",
-    url: "#",
-    icon: "",
-  },
-  {
-    title: "Inbox",
-    url: "#",
-    icon: "",
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: "",
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: "",
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: "",
-  },
-]
 
 export function AppSidebar() {
+  // get data prompts of local storage
+  const [items, setItems] = useState<[{ id: number, text: string, date: Date, name: string }] | []>([])
+
+  useEffect(() => {
+    setItems([])
+    const getStorage = localStorage.getItem('prompt')
+    if (getStorage) {
+      const parsed = JSON.parse(getStorage)
+      setItems(parsed)
+    }
+  }, [])
+
   return (
     <Sidebar variant="floating">
-      <SidebarHeader className="flex">
-        <Button size="lg" asChild>
-          <Link href='/created-prompt'>Crear prompt</Link>
-        </Button>
-
-        <Button size="lg" variant="outline" asChild>
-          <Link href='/'><ArrowBigLeft /></Link>
+      <SidebarHeader>
+        <Button variant="link" className="flex justify-start" asChild>
+          <Link href='/'><MoveLeft />Volver atrás</Link>
         </Button>
       </SidebarHeader>
       <SidebarContent>
@@ -60,12 +33,11 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      {/* <item.icon /> */}
-                      <span>{item.title}</span>
-                    </a>
+                    <Link className="text-start" href={`/prompt?id=${item.id}`}>
+                      <span className="block">{item.name}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
