@@ -57,7 +57,7 @@ export default function Prompt() {
   }
 
   // function for save prompt in local storage
-  const savePrompt = (value: YooptaContentValue, id: string) => {
+  const savePrompt = (value: YooptaContentValue, id: string | null) => {
     const editorContent = editor.getPlainText(value)
     const getStorage = localStorage.getItem('prompt')
 
