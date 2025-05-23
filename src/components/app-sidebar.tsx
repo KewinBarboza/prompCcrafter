@@ -35,7 +35,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton asChild>
-                    <Link className="text-start" href={`/prompt?id=${item.id}`}>
+                    <Link className="text-start" href={`/prompt?id=${item.id}&edit=false`}>
                       <span className="block">{item.name}</span>
                     </Link>
                   </SidebarMenuButton>
