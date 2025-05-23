@@ -72,10 +72,7 @@ export default function CreatedPrompt() {
     setIsComplete(true)
     setIsLoading(true)
 
-
-
     const prompt = promptMaster(formData)
-    console.log('list ', formData)
 
     setPrompts([])
     fetch("/api/prompt", {
@@ -555,22 +552,22 @@ const Complete = ({ prompts }: { prompts: { name: string, prompt: string }[] }) 
             <p className="text-sm text-gray-500">{prompt.prompt}</p>
 
             <div className="flex justify-end gap-x-2 mt-5">
-              <Button variant="outline" className="rounded-full" onClick={() => copyToClipboard(prompt.prompt)}>
-                <Copy className="ml-2" />
+              <Button variant="outline" onClick={() => copyToClipboard(prompt.prompt)}>
+                <Copy />
                 {btnText}
               </Button>
 
-              <Button asChild variant="default" className="rounded-full">
-                <Link href={`/prompt/?prompt=${encodeURIComponent(prompt.prompt)}`}>
-                  <Save className="ml-2" />
+              <Button asChild variant="default">
+                <Link href={`/prompt/?prompt=${encodeURIComponent(prompt.prompt)}&edit=true&name=${encodeURIComponent(prompt.name)}`}>
+                  <Save />
                   Editar prompt
                 </Link>
 
               </Button>
 
-              <Button asChild variant="default" className="rounded-full">
+              <Button asChild variant="default">
                 <Link href={`https://chat.openai.com/?prompt=${encodeURIComponent(prompt.prompt)}`} target="_blank" rel="noopener noreferrer">
-                  <ArrowRightToLine className="ml-2" />
+                  <ArrowRightToLine />
                   Ir a ChatGpt
                 </Link>
               </Button>
