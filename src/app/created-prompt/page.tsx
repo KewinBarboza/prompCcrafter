@@ -57,6 +57,15 @@ export default function CreatedPrompt() {
   const [prompts, setPrompts] = useState<{ name: string, prompt: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+  const [suggestions, setSuggestions] = useState({
+    context: [],
+    inputOutput: [],
+    format: [],
+    style: "",
+    tokenRange: 0,
+    tempRange: 0
+  })
+
   const [formData, setFormData] = useState({
     objective: "",
     context: "",
@@ -66,6 +75,8 @@ export default function CreatedPrompt() {
     tokenRange: 0,
     tempRange: 0
   })
+
+  const currentIndex = utils.getIndex(methods.current.id)
 
   const getDataPrompt = (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -93,6 +104,73 @@ export default function CreatedPrompt() {
       })
   }
 
+  const createSuggestion = () => {
+    methods.next()
+
+    if (currentIndex === 4) return
+    console.log('first')
+    setIsLoading(true)
+
+    let question = ""
+
+    if (currentIndex === 0) {
+      question = 'Actúa como un experto en creación de prompts para IA. proporciona ejemplos de contextos según el objetivo para ayudar a completar el prompt para mejorar el contexto. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + '. Proporciona 4 ejemplos que sirvan para completar el prompt que sean concisos y relevantes para mejorar el contexto del prompt. Asegúrate de que los ejemplos sean prácticas y aplicables y que funcionen como un auto completado para el usuario según el objetivo. No incluyas explicaciones, solo los ejemplos en formato JSON. Cada ejemplo debe tener un campo "name" y "suggestion". sigue este ejemplo: {"name": "Email marketing", "suggestion": "El cliente ' + "Tech Solutions Inc" + ' asistió a nuestro webinar sobre ' + "IA en Marketing" + ' la semana pasada y expresó interés en nuestro producto ' + "AnalyticPro" + '. El objetivo del email es agendar una demo."}'
+    }
+
+    if (currentIndex === 1) {
+      question = 'Actúa como un experto en creación de prompts para IA. Proporciona ejemplos para mejorar la sección de entrada y salida del prompt. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + ' y el contexto se es el siguiente: ' + formData.context + '. Proporciona 4 ejemplos de entrada y salida que sean relevantes y útiles para el objetivo del usuario. Asegúrate de que las sugerencias sean prácticas y aplicables. No incluyas explicaciones, solo las sugerencias en formato JSON. Cada sugerencia debe tener un campo "name" y "suggestion". cada ejemplo de tener una entrada y una salida. Sigue este ejemplo: {"name": "Email", "suggestion": "Entrada: Buenas tardes, Tech Solutions Inc el objetivo de este email es ofrecerle nuestro producto ya que asistió a nuestro webinar. Salida:  Estimado cliente, gracias por asistir a nuestro webinar. ya que asistió a nuestro webinar le ofrecemos nuestros mejores productos."}'
+    }
+
+    if (currentIndex === 2) {
+      question = 'Actúa como un experto en creación de prompts para IA. Proporciona sugerencias para mejorar el formato de la respuesta del prompt. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + ' y el contexto es: ' + formData.context + '. Proporciona 4 formatos diferentes que sean relevantes y útiles para el objetivo del usuario. Asegúrate de que las sugerencias sean prácticas y aplicables. No incluyas explicaciones, solo las sugerencias en formato JSON. Cada sugerencia debe tener un campo "name" y "suggestion".'
+    }
+
+    if (currentIndex === 3) {
+      question = 'Actúa como un experto en creación de prompts para IA. Proporciona sugerencias para mejorar el estilo y tono del prompt. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + ' y el contexto es: ' + formData.context + '. Proporciona 4 estilos o tonos diferentes que sean relevantes y útiles para el objetivo del usuario. Asegúrate de que las sugerencias sean prácticas y aplicables. No incluyas explicaciones, solo las sugerencias en formato JSON. Cada sugerencia debe tener un campo "name" y "suggestion".'
+    }
+
+
+    fetch("/api/suggestion", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: question,
+    }).then((res) => res.json())
+      .then((data) => {
+        if (currentIndex === 0) {
+          setSuggestions((prev) => ({
+            ...prev,
+            context: data.suggestions
+          }))
+        }
+        if (currentIndex === 1) {
+          setSuggestions((prev) => ({
+            ...prev,
+            inputOutput: data.suggestions
+          }))
+        }
+        if (currentIndex === 2) {
+          setSuggestions((prev) => ({
+            ...prev,
+            format: data.suggestions
+          }))
+        }
+        if (currentIndex === 3) {
+          setSuggestions((prev) => ({
+            ...prev,
+            style: data.suggestions
+          }))
+        }
+      }).catch((error) => {
+        console.error("Error:", error)
+
+
+      }).finally(() => {
+        setIsLoading(false)
+      })
+  }
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target
 
@@ -111,11 +189,11 @@ export default function CreatedPrompt() {
     }))
   }
 
-  const currentIndex = utils.getIndex(methods.current.id)
+
 
   return (
     <>
-      <section className="h-dvh w-dvw grid-rows-3 flex flex-col items-center justify-center">
+      <section className="h-dvh w-dvw flex flex-col items-center justify-center">
         <div className="max-w-4xl flex justify-start w-full">
           <Button size="lg" variant="link" asChild>
             <Link href='/'><MoveLeft />Volver atrás</Link>
@@ -140,10 +218,10 @@ export default function CreatedPrompt() {
             <div className="max-w-4xl flex flex-col">
               <form className="max-w-fit" onSubmit={getDataPrompt}>
                 {methods.when("step-1", () => <Task handleChange={handleChange} />)}
-                {methods.when("step-2", () => <Context handleChange={handleChange} />)}
-                {methods.when("step-3", () => <InputOutput handleChange={handleChange} />)}
-                {methods.when("step-4", () => <FormatExit handleChange={handleChange} />)}
-                {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} />)}
+                {methods.when("step-2", () => <Context handleChange={handleChange} suggestions={suggestions.context} isLoading={isLoading} />)}
+                {methods.when("step-3", () => <InputOutput handleChange={handleChange} suggestions={suggestions.inputOutput} isLoading={isLoading} />)}
+                {methods.when("step-4", () => <FormatExit handleChange={handleChange} suggestions={suggestions.format} isLoading={isLoading} />)}
+                {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} suggestions={suggestions.style} isLoading={isLoading} />)}
                 {methods.when("step-6", () => <Settings handleChange={handleChange} />)}
 
                 {
@@ -156,7 +234,7 @@ export default function CreatedPrompt() {
                       >
                         Anterior
                       </Button>
-                      <Button onClick={methods.next}>
+                      <Button onClick={createSuggestion}>
                         {methods.isLast ? 'Crear prompt' : 'Siguiente'}
                       </Button>
                     </div>
@@ -195,7 +273,7 @@ const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaEle
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
-        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-7">
           <ObjectiveSummaryExample
             name="objective"
             value="Resume un texto explicando solo los puntos clave sin agregar opiniones personales."
@@ -230,7 +308,7 @@ const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaEle
   )
 }
 
-const Context = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const Context = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
   return (
     <div>
       <textarea
@@ -242,45 +320,28 @@ const Context = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextArea
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
-        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="context"
-            value="Email Marketing (Startup Tecnológica): Somos una startup de tecnología educativa a punto de lanzar 'LinguaBoost'. Queremos anunciar el lanzamiento (15 de junio), destacar características (aprendizaje adaptativo, personajes interactivos) y ofrecer descuento del 20%."
-            label="Email Marketing"
-            description="Email Marketing (Startup Tecnológica): Somos una startup de tecnología educativa a punto de lanzar 'LinguaBoost'. Queremos anunciar el lanzamiento (15 de junio), destacar características (aprendizaje adaptativo, personajes interactivos) y ofrecer descuento del 20%."
-          />
-
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="context"
-            value="E-commerce (Zapatillas Running): Descripción para 'Velocity Pro' de 'RunFast'. Para maratonistas, suela de carbono, upper ligero, peso 210g, drop 8mm. Transmitir velocidad y tecnología."
-            label="E-commerce"
-            description="E-commerce (Zapatillas Running): Descripción para 'Velocity Pro' de 'RunFast'. Para maratonistas, suela de carbono, upper ligero, peso 210g, drop 8mm. Transmitir velocidad y tecnología."
-          />
-
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="context"
-            value="Video Explicativo (Herramienta SaaS): Guion para 'TaskMaster' (gestión de proyectos). Integración con calendarios, colaboración real, notificaciones. Para freelancers y PYMEs. Llamada a acción: prueba gratuita 14 días."
-            label="Video Explicativo"
-            description="Video Explicativo (Herramienta SaaS): Guion para 'TaskMaster' (gestión de proyectos). Integración con calendarios, colaboración real, notificaciones. Para freelancers y PYMEs. Llamada a acción: prueba gratuita 14 días."
-          />
-
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="context"
-            value="Redes Sociales (Nutricionista): Plan de contenidos para Instagram (junio). Dietas plant-based. Pilares: recetas veganas, mitos nutrición, mindfulness, transición a plant-based. Audiencia: mujeres 25-45 años."
-            label="Redes Sociales"
-            description="Redes Sociales (Nutricionista): Plan de contenidos para Instagram (junio). Dietas plant-based. Pilares: recetas veganas, mitos nutrición, mindfulness, transición a plant-based. Audiencia: mujeres 25-45 años."
-          />
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-7 p-2">
+          {isLoading ? (
+            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+          ) : (
+            suggestions.map((suggestion, index) => (
+              <ObjectiveSummaryExample
+                key={index}
+                handleRadioToTextarea={handleRadioToTextarea}
+                name="context"
+                value={suggestion.suggestion}
+                label={suggestion.name}
+                description={suggestion.suggestion}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-const InputOutput = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const InputOutput = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
   return (
     <div>
       <textarea
@@ -291,8 +352,22 @@ const InputOutput = ({ handleChange }: { handleChange: FormEventHandler<HTMLText
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
-        <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
-          <ObjectiveSummaryExample
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-7">
+          {isLoading ? (
+            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+          ) : (
+            suggestions.map((suggestion, index) => (
+              <ObjectiveSummaryExample
+                key={index}
+                handleRadioToTextarea={handleRadioToTextarea}
+                name="inputOutput"
+                value={suggestion.suggestion}
+                label={suggestion.name}
+                description={suggestion.suggestion}
+              />
+            ))
+          )}
+          {/* <ObjectiveSummaryExample
             handleRadioToTextarea={handleRadioToTextarea}
             name="inputOutput"
             value="Entrada: 'Resume el siguiente texto sobre cambio climático manteniendo viñetas y sin opiniones personales.' Salida: '- Aumento de temperatura global\n- Derretimiento de glaciares\n- Impacto en ecosistemas'"
@@ -322,14 +397,14 @@ const InputOutput = ({ handleChange }: { handleChange: FormEventHandler<HTMLText
             value="Entrada: 'Crea una tabla de indicadores de rendimiento (KPI) para un proyecto de marketing.' Salida: 'Tabla KPI | Descripción | Meta'"
             label="Estructura tabular de KPIs"
             description="Entrada y salida para generación de tabla de KPIs."
-          />
+          /> */}
         </div>
       </div>
     </div>
   )
 }
 
-const FormatExit = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const FormatExit = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
   return (
     <div>
       <textarea
@@ -340,42 +415,56 @@ const FormatExit = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextA
         placeholder="Ej: JSON, Lista, Párrafo, Código"></textarea>
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">Seleccione el formato en el que desea recibir la respuesta</span>
-        <div className="grid md:grid-cols-4 grid-cols-1 gap-7">
-          <ObjectiveSummaryExample
+        <div className="grid md:grid-cols-2 grid-cols-1 gap-7">
+          {isLoading ? (
+            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+          ) : (
+            suggestions.map((suggestion, index) => (
+              <ObjectiveSummaryExample
+                key={index}
+                handleRadioToTextarea={handleRadioToTextarea}
+                name="format"
+                value={suggestion.suggestion}
+                label={suggestion.name}
+                description={suggestion.suggestion}
+              />
+            ))
+          )}
+          {/* <ObjectiveSummaryExample
             handleRadioToTextarea={handleRadioToTextarea}
             name="format"
             value="JSON"
-            label="🗂️ JSON"
+            label="JSON"
             description="Recibe la respuesta en formato JSON estructurado."
           />
           <ObjectiveSummaryExample
             handleRadioToTextarea={handleRadioToTextarea}
             name="format"
             value="Lista"
-            label="📋 Lista"
+            label="Lista"
             description="Recibe la respuesta como una lista de elementos."
           />
           <ObjectiveSummaryExample
             handleRadioToTextarea={handleRadioToTextarea}
             name="format"
             value="Párrafo"
-            label="📄 Párrafo"
+            label="Párrafo"
             description="Recibe la respuesta en formato de texto corrido o párrafo."
           />
           <ObjectiveSummaryExample
             handleRadioToTextarea={handleRadioToTextarea}
             name="format"
             value="Código"
-            label="💻 Fragmento de código"
+            label="Fragmento de código"
             description="Recibe la respuesta como un bloque de código."
-          />
+          /> */}
         </div>
       </div>
     </div>
   )
 }
 
-const StyleAndTone = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const StyleAndTone = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
   return (
     <div>
       <textarea
@@ -387,7 +476,21 @@ const StyleAndTone = ({ handleChange }: { handleChange: FormEventHandler<HTMLTex
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
-          <ObjectiveSummaryExample
+          {isLoading ? (
+            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+          ) : (
+            suggestions.map((suggestion, index) => (
+              <ObjectiveSummaryExample
+                key={index}
+                handleRadioToTextarea={handleRadioToTextarea}
+                name="style"
+                value={suggestion.suggestion}
+                label={suggestion.name}
+                description={suggestion.suggestion}
+              />
+            ))
+          )}
+          {/* <ObjectiveSummaryExample
             handleRadioToTextarea={handleRadioToTextarea}
             name="style"
             value="Utiliza un lenguaje profesional, serio y estructurado, adecuado para contextos académicos o de negocios."
@@ -421,7 +524,7 @@ const StyleAndTone = ({ handleChange }: { handleChange: FormEventHandler<HTMLTex
             value="Ofrece una explicación extensa y minuciosa, cubriendo todos los aspectos relevantes del tema."
             label="Detallado"
             description="Ofrece una explicación extensa y minuciosa, cubriendo todos los aspectos relevantes del tema."
-          />
+          /> */}
         </div>
       </div>
     </div>
