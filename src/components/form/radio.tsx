@@ -16,7 +16,7 @@ export const ObjectiveSummaryExample = ({
 }: ObjectiveSummaryExampleProps) => (
   <label className="
     has-checked:border-primary
-    has-checked:border-[2.5px] border-[2.5px] border-neutral-300
+    has-checked:border-[1px] border-[1px] border-neutral-200
     flex text-base p-6 rounded-3xl justify-between
     hover:bg-neutral-50 select-none">
     <span>
