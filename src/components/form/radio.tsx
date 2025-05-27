@@ -16,13 +16,13 @@ export const ObjectiveSummaryExample = ({
 }: ObjectiveSummaryExampleProps) => (
   <label className="
     has-checked:border-primary
-    has-checked:border-[1px] border-[1px] border-neutral-200
+    has-checked:border border border-neutral-200
     flex text-base p-6 rounded-3xl justify-between
     hover:bg-neutral-50 select-none">
     <span>
-      <span className="block text-lg font-sans">
+      <span className="block text-xl font-sans">
         {label}
-        <span className="mt-1 block text-sm text-neutral-500">
+        <span className="mt-1 block text-lg text-neutral-500">
           {description}
         </span>
       </span>
