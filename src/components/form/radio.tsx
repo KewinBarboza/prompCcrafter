@@ -15,8 +15,8 @@ export const ObjectiveSummaryExample = ({
   handleRadioToTextarea
 }: ObjectiveSummaryExampleProps) => (
   <label className="
-    has-checked:ring-primary
-    has-checked:ring-2 ring ring-neutral-300
+    has-checked:border-primary
+    has-checked:border-[2.5px] border-[2.5px] border-neutral-300
     flex text-base p-6 rounded-3xl justify-between
     hover:bg-neutral-50 select-none">
     <span>
