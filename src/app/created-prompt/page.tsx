@@ -13,33 +13,33 @@ import { SkeletonList } from "@/components/skeleton-list"
 
 const { useStepper, utils } = defineStepper({
   id: "step-1",
-  title: "1. ¿Cuál es el objetivo o tarea principal que quieres que el modelo realice?",
-  description: "Describe la tarea central que la IA debe realizar. Sé específico y claro."
+  title: "¿ Cuál es el objetivo o tarea principal que quieres que la IA realice ?",
+  description: "Comienza por establecer claramente qué tarea fundamental quieres que la IA realice. Una meta bien definida es el primer paso hacia un prompt efectivo."
 },
   {
     id: "step-2",
-    title: "2. Contexto Relevante",
-    description: "Proporciona la información de fondo necesaria para que la IA entienda la situación completamente."
+    title: "Proporciona el Contexto Esencial",
+    description: "La IA necesita entender el 'quién', 'qué', 'dónde', 'cuándo' y 'porqué' de tu solicitud. Describe la situación, los antecedentes o cualquier dato relevante que la IA deba conocer para actuar con precisión."
   },
   {
     id: "step-3",
-    title: "3. Selecciona un ejemplo de entrada y salida deseada",
+    title: "Selecciona un ejemplo de entrada y salida deseada",
     description: "Proporcionar ejemplos (técnica few-shot) es muy efectivo para guiar a la IA. Para clasificación, mezcla las clases en los ejemplos."
   },
   {
     id: "step-4",
-    title: "4. ¿En qué formato deseas recibir la respuesta?",
+    title: "¿En qué formato deseas recibir la respuesta?",
     description: "Especificar el formato ayuda a obtener resultados estructurados."
   },
   {
     id: "step-5",
-    title: "5. ¿Qué estilo, tono o rol debe adoptar el modelo al generar la respuesta?",
-    description: "El tono adecuado puede hacer la respuesta más efectiva para tu audiencia."
+    title: "¿Qué estilo, tono o rol debe adoptar el modelo al generar la respuesta?",
+    description: "Define la 'voz' de la IA. ¿Debe sonar formal, amigable, técnica o quizás humorística? El tono correcto conecta mejor con tu audiencia y el propósito del mensaje"
   },
   {
     id: "step-6",
-    title: "6. ¿Qué configuraciones o restricciones adicionales quieres aplicar?",
-    description: "Third step"
+    title: "¿Qué configuraciones o restricciones adicionales quieres aplicar?",
+    description: "Estos parámetros controlan la 'creatividad' (temperatura) y la longitud (tokens) de la respuesta. Ajústalos para casos de uso específicos o déjalos en sus valores predeterminados para un balance general."
   })
 
 // Utilidad para sincronizar radio y textarea
@@ -246,29 +246,29 @@ Formato:
 
   return (
     <>
-      <section className="h-dvh bg-blue-400 w-dvw grid grid-rows-10 justify-center">
-        <div className="max-w-4xl flex justify-start w-full bg-blue-800 row-span-1">
+      <section className="h-dvh w-dvw grid grid-rows-10 justify-center">
+        <div className="min-w-4xl flex items-end w-full row-span-1">
           <Button size="lg" variant="link" asChild>
             <Link href='/'><MoveLeft />Volver atrás</Link>
           </Button>
         </div>
         {isComplete === false ? (
           <>
-            <div className="py-6 max-w-4xl items-start flex justify-start w-full bg-blue-300 row-span-2">
-              <div className="flex gap-4">
+            <div className="py-6 max-w-4xl flex justify-center items-center w-full row-span-2">
+              <div className="gap-2 items-center flex flex-col">
                 <StepIndicator
                   currentStep={currentIndex + 1}
                   totalSteps={methods.all.length}
                 />
-                <div className="flex flex-col">
+                <div className="flex flex-col justify-center items-center mt-4">
                   <Text text={methods.current.title} />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-lg text-muted-foreground text-center">
                     {methods.current.description}
                   </p>
                 </div>
               </div>
             </div>
-            <div className="max-w-4xl flex flex-col relative row-span-7 bg-red-200">
+            <div className="max-w-4xl flex flex-col relative row-span-7">
               <form className="max-w-fit" onSubmit={getDataPrompt}>
                 {methods.when("step-1", () => <Task handleChange={handleChange} />)}
                 {methods.when("step-2", () => <Context handleChange={handleChange} suggestions={suggestions.context} isLoading={isLoading} />)}
@@ -277,24 +277,25 @@ Formato:
                 {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} suggestions={suggestions.style} isLoading={isLoading} />)}
                 {methods.when("step-6", () => <Settings handleChange={handleChange} />)}
 
-                <div className="absolute bottom-0 left-0 right-0 bg-white p-6 rounded-b-3xl shadow-lg">
+                <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-neutral-200">
                   {
                     methods.isLast === false ? (
-                      <div className="flex justify-between w-full mt-10">
+                      <div className="flex justify-between w-full">
                         <Button
                           variant="secondary"
                           onClick={methods.prev}
                           disabled={methods.isFirst}
+                          size="lg"
                         >
                           Anterior
                         </Button>
-                        <Button onClick={createSuggestion}>
+                        <Button onClick={createSuggestion} size="lg">
                           {methods.isLast ? 'Crear prompt' : 'Siguiente'}
                         </Button>
                       </div>
                     ) : (
-                      <div className="flex justify-end w-full mt-10">
-                        <Button size={"lg"} type="submit">Crear prompt</Button>
+                      <div className="flex justify-end w-full">
+                        <Button type="submit" size="lg">Crear prompt</Button>
                       </div>
                     )
                   }
@@ -323,11 +324,11 @@ const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaEle
         onInput={handleChange}
         name="objective"
         rows={3} required
-        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
+        className="w-full min-w-4xl px-4 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: Redactar un email de seguimiento a un cliente."></textarea>
 
       <div className="mt-4 space-y-2">
-        <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
+        <span className="text-gray-600 block mb-3 mt-5">Sugerencias</span>
         <div className="grid md:grid-cols-2 grid-cols-1 gap-7">
           <ObjectiveSummaryExample
             name="objective"
@@ -378,7 +379,7 @@ const Context = ({
         name="context"
         onInput={handleChange}
         rows={3} required
-        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
+        className="w-full min-w-4xl px-4 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: El cliente 'Tech Solutions Inc.' asistió a nuestro webinar sobre 'IA en Marketing' la semana pasada y expresó interés en nuestro producto 'AnalyticPro'. El objetivo del email es agendar una demo."></textarea>
 
       <div className="mt-4 space-y-2">
@@ -418,7 +419,7 @@ const InputOutput = ({
       <textarea
         name="inputOutput" rows={3} required
         onInput={handleChange}
-        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
+        className="w-full min-w-4xl px-4 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: \nEntrada: Traduce 'Hola Mundo' al francés.\nSalida: Bonjour le monde.\n\nEntrada: Cliente pregunta por el estado de su pedido #123.\nSalida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea>
 
       <div className="mt-4 space-y-2">
@@ -459,7 +460,7 @@ const FormatExit = ({
         name="format"
         rows={3} required
         onInput={handleChange}
-        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
+        className="w-full min-w-4xl px-4 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: JSON, Lista, Párrafo, Código"></textarea>
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">Seleccione el formato en el que desea recibir la respuesta</span>
@@ -498,7 +499,7 @@ const StyleAndTone = ({
       <textarea
         onInput={handleChange}
         name="style" rows={3} required
-        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
+        className="w-full min-w-4xl px-4 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Especifica otro estilo..."></textarea>
 
       <div className="mt-4 space-y-2">
@@ -549,7 +550,7 @@ const Settings = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAre
 
   return (
     <div>
-      <div className="mt-4  p-6 rounded-3xl ring ring-neutral-300">
+      <div className="mt-4 p-6 rounded-3xl border border-neutral-200">
         <label htmlFor="tokenRange" className="block text-sm font-medium text-gray-700">
           Número máximo de tokens:{" "}
           <span id="tokenValue" className="font-semibold">{token}</span>
@@ -567,7 +568,7 @@ const Settings = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAre
           onInput={handleChange}
         />
       </div>
-      <div className="mt-4  p-6 rounded-3xl ring ring-neutral-300">
+      <div className="mt-4  p-6 rounded-3xl border border-neutral-200">
         <label htmlFor="tempRange" className="block text-sm font-medium text-gray-700">
           Temperatura:{" "}
           <span id="tempValue" className="font-semibold">{temp}</span>
@@ -644,8 +645,8 @@ const Complete = ({ prompts }: { prompts: { name: string, prompt: string }[] }) 
       <div className="mt-4 space-y-2">
         {prompts.map((prompt, index) => (
           <div key={index} className="p-4 border rounded-lg">
-            <p>{prompt.name}</p>
-            <p className="text-sm text-gray-500">{prompt.prompt}</p>
+            <p className="text-xl">{prompt.name}</p>
+            <p className="text-2xl text-gray-500">{prompt.prompt}</p>
 
             <div className="flex justify-end gap-x-2 mt-5">
               <Button variant="outline" onClick={() => copyToClipboard(prompt.prompt)}>
