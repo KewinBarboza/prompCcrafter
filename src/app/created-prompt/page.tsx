@@ -4,11 +4,12 @@ import { ObjectiveSummaryExample } from "@/components/form/radio"
 import { StepIndicator } from "@/components/step-indicator"
 import { Button } from "@/components/ui/button"
 import { defineStepper } from "@stepperize/react"
-import { ArrowRightToLine, Copy, MoveLeft, Save } from "lucide-react"
+import { ArrowRightToLine, Copy, Loader2, MoveLeft, Save } from "lucide-react"
 import Link from "next/link"
 import { ChangeEvent, FormEventHandler, useState } from "react"
 import { Text } from "@/components/text"
 import { promptMaster } from "@/lib/prompt"
+import { SkeletonList } from "@/components/skeleton-list"
 
 const { useStepper, utils } = defineStepper({
   id: "step-1",
@@ -61,7 +62,7 @@ export default function CreatedPrompt() {
     context: [],
     inputOutput: [],
     format: [],
-    style: "",
+    style: [],
     tokenRange: 0,
     tempRange: 0
   })
@@ -108,27 +109,81 @@ export default function CreatedPrompt() {
     methods.next()
 
     if (currentIndex === 4) return
-    console.log('first')
+
     setIsLoading(true)
 
     let question = ""
 
+    // Paso 0: Contexto
     if (currentIndex === 0) {
-      question = 'Actúa como un experto en creación de prompts para IA. proporciona ejemplos de contextos según el objetivo para ayudar a completar el prompt para mejorar el contexto. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + '. Proporciona 4 ejemplos que sirvan para completar el prompt que sean concisos y relevantes para mejorar el contexto del prompt. Asegúrate de que los ejemplos sean prácticas y aplicables y que funcionen como un auto completado para el usuario según el objetivo. No incluyas explicaciones, solo los ejemplos en formato JSON. Cada ejemplo debe tener un campo "name" y "suggestion". sigue este ejemplo: {"name": "Email marketing", "suggestion": "El cliente ' + "Tech Solutions Inc" + ' asistió a nuestro webinar sobre ' + "IA en Marketing" + ' la semana pasada y expresó interés en nuestro producto ' + "AnalyticPro" + '. El objetivo del email es agendar una demo."}'
+      question = `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${formData.objective}
+Genera 4 ejemplos en JSON (sin explicaciones) que enriquezcan el contexto. Según el objetivo para ayudar a completar el prompt para mejorar el contexto.
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Texto conciso..."},
+  …
+]`.trim()
     }
 
+    // Paso 1: Entrada y salida
     if (currentIndex === 1) {
-      question = 'Actúa como un experto en creación de prompts para IA. Proporciona ejemplos para mejorar la sección de entrada y salida del prompt. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + ' y el contexto se es el siguiente: ' + formData.context + '. Proporciona 4 ejemplos de entrada y salida que sean relevantes y útiles para el objetivo del usuario. Asegúrate de que las sugerencias sean prácticas y aplicables. No incluyas explicaciones, solo las sugerencias en formato JSON. Cada sugerencia debe tener un campo "name" y "suggestion". cada ejemplo de tener una entrada y una salida. Sigue este ejemplo: {"name": "Email", "suggestion": "Entrada: Buenas tardes, Tech Solutions Inc el objetivo de este email es ofrecerle nuestro producto ya que asistió a nuestro webinar. Salida:  Estimado cliente, gracias por asistir a nuestro webinar. ya que asistió a nuestro webinar le ofrecemos nuestros mejores productos."}'
+      question = `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${formData.objective}
+- Contexto: ${formData.context}
+Proporciona ejemplos para mejorar la sección de entrada y salida del prompt 4 pares entrada/salida en JSON (sin explicaciones).
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres, formato "Entrada:…; Salida:…"
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Entrada:…; Salida:…"},
+  …
+]`.trim()
     }
 
+    // Paso 2: Formato de salida
     if (currentIndex === 2) {
-      question = 'Actúa como un experto en creación de prompts para IA. Proporciona sugerencias para mejorar el formato de la respuesta del prompt. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + ' y el contexto es: ' + formData.context + '. Proporciona 4 formatos diferentes que sean relevantes y útiles para el objetivo del usuario. Asegúrate de que las sugerencias sean prácticas y aplicables. No incluyas explicaciones, solo las sugerencias en formato JSON. Cada sugerencia debe tener un campo "name" y "suggestion".'
+      question = `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${formData.objective}
+- Contexto: ${formData.context}
+Genera 4 ejemplos según el contexto para mejorar el formato de salida de formato de salida en JSON (sin explicaciones).
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Texto conciso..."},
+  …
+]`.trim()
     }
 
+    // Paso 3: Estilo y tono
     if (currentIndex === 3) {
-      question = 'Actúa como un experto en creación de prompts para IA. Proporciona sugerencias para mejorar el estilo y tono del prompt. El objetivo actual que quiere realizar el usuario es: ' + formData.objective + ' y el contexto es: ' + formData.context + '. Proporciona 4 estilos o tonos diferentes que sean relevantes y útiles para el objetivo del usuario. Asegúrate de que las sugerencias sean prácticas y aplicables. No incluyas explicaciones, solo las sugerencias en formato JSON. Cada sugerencia debe tener un campo "name" y "suggestion".'
+      question = `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${formData.objective}
+- Contexto: ${formData.context}
+Genera 4 ejemplos de estilo y tono para mejorar el prompt. en JSON (sin explicaciones).
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Texto conciso..."},
+  …
+]`.trim()
     }
-
 
     fetch("/api/suggestion", {
       method: "POST",
@@ -189,19 +244,17 @@ export default function CreatedPrompt() {
     }))
   }
 
-
-
   return (
     <>
-      <section className="h-dvh w-dvw flex flex-col items-center justify-center">
-        <div className="max-w-4xl flex justify-start w-full">
+      <section className="h-dvh bg-blue-400 w-dvw grid grid-rows-10 justify-center">
+        <div className="max-w-4xl flex justify-start w-full bg-blue-800 row-span-1">
           <Button size="lg" variant="link" asChild>
             <Link href='/'><MoveLeft />Volver atrás</Link>
           </Button>
         </div>
         {isComplete === false ? (
           <>
-            <div className="py-6 max-w-4xl items-start flex justify-start w-full">
+            <div className="py-6 max-w-4xl items-start flex justify-start w-full bg-blue-300 row-span-2">
               <div className="flex gap-4">
                 <StepIndicator
                   currentStep={currentIndex + 1}
@@ -215,7 +268,7 @@ export default function CreatedPrompt() {
                 </div>
               </div>
             </div>
-            <div className="max-w-4xl flex flex-col">
+            <div className="max-w-4xl flex flex-col relative row-span-7 bg-red-200">
               <form className="max-w-fit" onSubmit={getDataPrompt}>
                 {methods.when("step-1", () => <Task handleChange={handleChange} />)}
                 {methods.when("step-2", () => <Context handleChange={handleChange} suggestions={suggestions.context} isLoading={isLoading} />)}
@@ -224,26 +277,28 @@ export default function CreatedPrompt() {
                 {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} suggestions={suggestions.style} isLoading={isLoading} />)}
                 {methods.when("step-6", () => <Settings handleChange={handleChange} />)}
 
-                {
-                  methods.isLast === false ? (
-                    <div className="flex justify-between w-full mt-10">
-                      <Button
-                        variant="secondary"
-                        onClick={methods.prev}
-                        disabled={methods.isFirst}
-                      >
-                        Anterior
-                      </Button>
-                      <Button onClick={createSuggestion}>
-                        {methods.isLast ? 'Crear prompt' : 'Siguiente'}
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex justify-end w-full mt-10">
-                      <Button size={"lg"} type="submit">Crear prompt</Button>
-                    </div>
-                  )
-                }
+                <div className="absolute bottom-0 left-0 right-0 bg-white p-6 rounded-b-3xl shadow-lg">
+                  {
+                    methods.isLast === false ? (
+                      <div className="flex justify-between w-full mt-10">
+                        <Button
+                          variant="secondary"
+                          onClick={methods.prev}
+                          disabled={methods.isFirst}
+                        >
+                          Anterior
+                        </Button>
+                        <Button onClick={createSuggestion}>
+                          {methods.isLast ? 'Crear prompt' : 'Siguiente'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex justify-end w-full mt-10">
+                        <Button size={"lg"} type="submit">Crear prompt</Button>
+                      </div>
+                    )
+                  }
+                </div>
               </form>
             </div>
           </>
@@ -251,7 +306,7 @@ export default function CreatedPrompt() {
           isLoading ? (
             <div className="max-w-4xl flex flex-col py-28 my-20">
               <div className="flex justify-center items-center w-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <Loader2 className="animate-spin" />
               </div>
             </div>) : (<div className="max-w-4xl flex flex-col"><Complete prompts={prompts} /></div>)
         )}
@@ -268,7 +323,7 @@ const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaEle
         onInput={handleChange}
         name="objective"
         rows={3} required
-        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: Redactar un email de seguimiento a un cliente."></textarea>
 
       <div className="mt-4 space-y-2">
@@ -308,21 +363,29 @@ const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaEle
   )
 }
 
-const Context = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const Context = ({
+  handleChange,
+  suggestions,
+  isLoading
+}: {
+  handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  suggestions: { name: string; suggestion: string }[]
+  isLoading: boolean
+}) => {
   return (
     <div>
       <textarea
         name="context"
         onInput={handleChange}
         rows={3} required
-        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: El cliente 'Tech Solutions Inc.' asistió a nuestro webinar sobre 'IA en Marketing' la semana pasada y expresó interés en nuestro producto 'AnalyticPro'. El objetivo del email es agendar una demo."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-2 grid-cols-1 gap-7 p-2">
           {isLoading ? (
-            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+            <SkeletonList />
           ) : (
             suggestions.map((suggestion, index) => (
               <ObjectiveSummaryExample
@@ -341,20 +404,28 @@ const Context = ({ handleChange, suggestions, isLoading }: { handleChange: FormE
   )
 }
 
-const InputOutput = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const InputOutput = ({
+  handleChange,
+  suggestions,
+  isLoading
+}: {
+  handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  suggestions: { name: string; suggestion: string }[]
+  isLoading: boolean
+}) => {
   return (
     <div>
       <textarea
         name="inputOutput" rows={3} required
         onInput={handleChange}
-        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: \nEntrada: Traduce 'Hola Mundo' al francés.\nSalida: Bonjour le monde.\n\nEntrada: Cliente pregunta por el estado de su pedido #123.\nSalida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-2 grid-cols-1 gap-7">
           {isLoading ? (
-            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+            <SkeletonList />
           ) : (
             suggestions.map((suggestion, index) => (
               <ObjectiveSummaryExample
@@ -367,57 +438,34 @@ const InputOutput = ({ handleChange, suggestions, isLoading }: { handleChange: F
               />
             ))
           )}
-          {/* <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="inputOutput"
-            value="Entrada: 'Resume el siguiente texto sobre cambio climático manteniendo viñetas y sin opiniones personales.' Salida: '- Aumento de temperatura global\n- Derretimiento de glaciares\n- Impacto en ecosistemas'"
-            label="Resumen con formato y restricción de opinión"
-            description="Entrada y salida para resumen objetivo con formato de viñetas y sin opiniones personales."
-          />
-
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="inputOutput"
-            value="Entrada: 'Clasifica las siguientes reseñas en positivo, negativo o neutral y explica tu elección.' Salida: 'Positivo: La calidad es excelente porque...'"
-            label="Clasificación de sentimiento con justificación"
-            description="Entrada y salida para clasificación de sentimiento con explicación."
-          />
-
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="inputOutput"
-            value=""
-            label="Generación de código con docstring y prueba"
-            description="Entrada y salida para generación de código documentado y con prueba unitaria."
-          />
-
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="inputOutput"
-            value="Entrada: 'Crea una tabla de indicadores de rendimiento (KPI) para un proyecto de marketing.' Salida: 'Tabla KPI | Descripción | Meta'"
-            label="Estructura tabular de KPIs"
-            description="Entrada y salida para generación de tabla de KPIs."
-          /> */}
         </div>
       </div>
     </div>
   )
 }
 
-const FormatExit = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const FormatExit = ({
+  handleChange,
+  suggestions,
+  isLoading
+}: {
+  handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  suggestions: { name: string; suggestion: string }[]
+  isLoading: boolean
+}) => {
   return (
     <div>
       <textarea
         name="format"
         rows={3} required
         onInput={handleChange}
-        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Ej: JSON, Lista, Párrafo, Código"></textarea>
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">Seleccione el formato en el que desea recibir la respuesta</span>
         <div className="grid md:grid-cols-2 grid-cols-1 gap-7">
           {isLoading ? (
-            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+            <SkeletonList />
           ) : (
             suggestions.map((suggestion, index) => (
               <ObjectiveSummaryExample
@@ -430,54 +478,34 @@ const FormatExit = ({ handleChange, suggestions, isLoading }: { handleChange: Fo
               />
             ))
           )}
-          {/* <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="format"
-            value="JSON"
-            label="JSON"
-            description="Recibe la respuesta en formato JSON estructurado."
-          />
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="format"
-            value="Lista"
-            label="Lista"
-            description="Recibe la respuesta como una lista de elementos."
-          />
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="format"
-            value="Párrafo"
-            label="Párrafo"
-            description="Recibe la respuesta en formato de texto corrido o párrafo."
-          />
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="format"
-            value="Código"
-            label="Fragmento de código"
-            description="Recibe la respuesta como un bloque de código."
-          /> */}
         </div>
       </div>
     </div>
   )
 }
 
-const StyleAndTone = ({ handleChange, suggestions, isLoading }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+const StyleAndTone = ({
+  handleChange,
+  suggestions,
+  isLoading
+}: {
+  handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  suggestions: { name: string; suggestion: string }[]
+  isLoading: boolean
+}) => {
   return (
     <div>
       <textarea
         onInput={handleChange}
         name="style" rows={3} required
-        className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full min-w-4xl px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
         placeholder="Especifica otro estilo..."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
         <div className="grid md:grid-cols-3 grid-cols-1 gap-7">
           {isLoading ? (
-            <p className="text-gray-500">No hay sugerencias disponibles.</p>
+            <SkeletonList />
           ) : (
             suggestions.map((suggestion, index) => (
               <ObjectiveSummaryExample
@@ -490,41 +518,6 @@ const StyleAndTone = ({ handleChange, suggestions, isLoading }: { handleChange: 
               />
             ))
           )}
-          {/* <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="style"
-            value="Utiliza un lenguaje profesional, serio y estructurado, adecuado para contextos académicos o de negocios."
-            label="Formal"
-            description="Utiliza un lenguaje profesional, serio y estructurado, adecuado para contextos académicos o de negocios."
-          />
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="style"
-            value="Emplea un tono divertido y ligero, incorporando humor para hacer la respuesta más amena."
-            label="Humorístico"
-            description="Emplea un tono divertido y ligero, incorporando humor para hacer la respuesta más amena."
-          />
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="style"
-            value="Redacta la respuesta con precisión técnica y vocabulario especializado, como lo haría un profesional del área."
-            label="Técnico experto"
-            description="Redacta la respuesta con precisión técnica y vocabulario especializado, como lo haría un profesional del área."
-          />
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="style"
-            value="Presenta la información de manera breve y concisa, enfocándose solo en los puntos clave."
-            label="Resumido"
-            description="Presenta la información de manera breve y concisa, enfocándose solo en los puntos clave."
-          />
-          <ObjectiveSummaryExample
-            handleRadioToTextarea={handleRadioToTextarea}
-            name="style"
-            value="Ofrece una explicación extensa y minuciosa, cubriendo todos los aspectos relevantes del tema."
-            label="Detallado"
-            description="Ofrece una explicación extensa y minuciosa, cubriendo todos los aspectos relevantes del tema."
-          /> */}
         </div>
       </div>
     </div>
