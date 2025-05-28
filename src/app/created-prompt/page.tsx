@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { defineStepper } from "@stepperize/react"
 import { Loader2, MoveLeft } from "lucide-react"
 import Link from "next/link"
-import { ChangeEvent, useState } from "react"
+import { ChangeEvent, useEffect, useState } from "react"
 import { Text } from "@/components/text"
 import { promptMaster, promptsSuggestion } from "@/lib/prompt"
 import { Task } from "@/components/form_created_prompt/task"
@@ -53,6 +53,7 @@ export default function CreatedPrompt() {
   const [prompts, setPrompts] = useState<{ name: string, prompt: string }[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+  const [suggestionsTask, setSuggestionsTask] = useState<{ name: string, suggestion: string }[]>([])
   const [suggestions, setSuggestions] = useState({
     context: [],
     inputOutput: [],
@@ -71,6 +72,12 @@ export default function CreatedPrompt() {
     tokenRange: 0,
     tempRange: 0
   })
+
+  useEffect(() => {
+    if (methods.current.id === "step-1") {
+      suggestionForTask()
+    }
+  }, [])
 
   const currentIndex = utils.getIndex(methods.current.id)
 
@@ -148,6 +155,44 @@ export default function CreatedPrompt() {
     }
   }
 
+  const suggestionForTask = async () => {
+    const question = `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: Generar una lista de sugerencias de tareas para un prompt de IA que no sean tareas físicas.
+Genera 4 ejemplos en JSON (sin explicaciones) que den bastante juego al usuario para que puede seleccionar y en español.
+Cada objeto debe tener:
+  • "name": 2-3 palabras con un título breve y solo la primera letra del título que sea mayúscula.
+  • "suggestion": ≤100 caracteres con una descripción concisa de la tarea.
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Texto conciso..."},
+  …
+]`.trim()
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/suggestion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: question,
+      })
+
+
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`)
+      }
+      const data = await response.json()
+      // console.log(data.suggestions)
+      setSuggestionsTask(data.suggestions)
+    } catch (error) {
+      console.error("Error al obtener sugerencias de tareas:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = e.target
 
@@ -192,7 +237,7 @@ export default function CreatedPrompt() {
           </div>
           <div className="max-w-4xl flex flex-col relative row-span-7">
             <form className="max-w-fit" onSubmit={getDataPrompt}>
-              {methods.when("step-1", () => <Task handleChange={handleChange} />)}
+              {methods.when("step-1", () => <Task handleChange={handleChange} suggestions={suggestionsTask} isLoading={isLoading} />)}
               {methods.when("step-2", () => <Context handleChange={handleChange} suggestions={suggestions.context} isLoading={isLoading} />)}
               {methods.when("step-3", () => <InputOutput handleChange={handleChange} suggestions={suggestions.inputOutput} isLoading={isLoading} />)}
               {methods.when("step-4", () => <FormatExit handleChange={handleChange} suggestions={suggestions.format} isLoading={isLoading} />)}
