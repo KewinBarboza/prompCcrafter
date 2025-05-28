@@ -20,9 +20,9 @@ export const ObjectiveSummaryExample = ({
     flex text-base p-6 rounded-3xl justify-between
     hover:bg-neutral-50 select-none">
     <span>
-      <span className="block text-xl font-sans">
+      <span className="block text-lg font-sans">
         {label}
-        <span className="mt-1 block text-lg text-neutral-500">
+        <span className="mt-1 block text-base text-neutral-500">
           {description}
         </span>
       </span>
