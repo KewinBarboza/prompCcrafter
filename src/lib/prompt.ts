@@ -42,6 +42,15 @@ export const promptMaster = ({ objective, inputOutput, format, style, tempRange,
 6. **Validación previa**
    Reconfirma que entiendes todas las instrucciones antes de generar las respuestas.
 
+7. **Titulo breve**
+    Cada prompt debe tener un título breve que resuma su propósito en 2-3 palabras que este solo la primera letra en mayúsculas y que no este enumerado.
+
+8. **Formato de salida**
+    Los prompts deben ser devueltos en un bloque de código JSON, con cada prompt como un objeto que contenga:
+  • "name": Título breve del prompt (2-3 palabras)
+  • "prompt": El texto completo del prompt en formato markdown, sin explicaciones adicionales.
+9. **Idioma**
+    Todos los prompts deben estar en español, utilizando un lenguaje claro y directo.
 ---
 
 ## Salida esperada
