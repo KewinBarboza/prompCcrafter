@@ -18,8 +18,8 @@ export async function POST(req: Request) {
       schema: z.object({
         prompt: z.array(
           z.object({
-            name: z.string(),
-            prompt: z.string(),
+            name: z.string().describe('El nombre del prompt corto y preciso que describe la tarea y que no este enumerado'),
+            prompt: z.string().describe('El prompt generado por el modelo en formato markdown'),
           })
         )
       }),
