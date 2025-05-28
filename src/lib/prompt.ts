@@ -47,3 +47,65 @@ export const promptMaster = ({ objective, inputOutput, format, style, tempRange,
 ## Salida esperada
 
 Devuélveme un bloque numerado de **3 prompts** completos, listos para usar, con la siguiente estructura:`
+
+export const promptsSuggestion = (context: string, objective: string, currentIndex: number) => {
+  const prompts: Record<number, string> = {
+    0: `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${objective}
+Genera 4 ejemplos en JSON (sin explicaciones) que enriquezcan el contexto. Según el objetivo para ayudar a completar el prompt para mejorar el contexto.
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Texto conciso..."},
+  …
+]`.trim(),
+    1: `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${objective}
+- Contexto: ${context}
+Proporciona ejemplos para mejorar la sección de entrada y salida del prompt 4 pares entrada/salida en JSON (sin explicaciones).
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres, formato "Entrada:…; Salida:…"
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Entrada:…; Salida:…"},
+  …
+]`.trim(),
+    2: `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${objective}
+- Contexto: ${context}
+Genera 4 ejemplos según el contexto para mejorar el formato de salida de formato de salida en JSON (sin explicaciones).
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Texto conciso..."},
+  …
+]`.trim(),
+    3: `
+Actúa como experto en prompts para IA.
+Dados:
+- Objetivo: ${objective}
+- Contexto: ${context}
+Genera 4 ejemplos de estilo y tono para mejorar el prompt. en JSON (sin explicaciones).
+Cada objeto debe tener:
+  • "name": 2-3 palabras
+  • "suggestion": ≤100 caracteres
+Formato:
+[
+  {"name":"Título Breve","suggestion":"Texto conciso..."},
+  …
+]`.trim()
+  }
+
+  return prompts[currentIndex] || ''
+}
