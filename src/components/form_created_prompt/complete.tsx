@@ -32,8 +32,8 @@ export const Complete = ({ prompts }: { prompts: { name: string, prompt: string 
       <div className="mt-4 space-y-2">
         {prompts.map((prompt, index) => (
           <div key={index} className="p-6 border rounded-3xl mb-8">
-            <p className="text-2xl mb-2">{prompt.name}</p>
-            <p className="text-xl text-gray-500">{prompt.prompt}</p>
+            <p className="text-lg mb-2">{prompt.name}</p>
+            <p className="text-base text-gray-500">{prompt.prompt}</p>
 
             <div className="flex justify-end gap-x-2 mt-10">
               <Button variant="outline" onClick={() => copyToClipboard(prompt.prompt)}>
