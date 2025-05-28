@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Button } from "../ui/button"
-import { ArrowRightToLine, Copy, Link, Save } from "lucide-react"
+import { ArrowRightToLine, Copy, Save } from "lucide-react"
+import Link from "next/link"
 
 export const Complete = ({ prompts }: { prompts: { name: string, prompt: string }[] }) => {
   const [btnText, setBtnText] = useState("Copiar")
@@ -30,11 +31,11 @@ export const Complete = ({ prompts }: { prompts: { name: string, prompt: string 
     <div>
       <div className="mt-4 space-y-2">
         {prompts.map((prompt, index) => (
-          <div key={index} className="p-4 border rounded-lg">
-            <p className="text-xl">{prompt.name}</p>
-            <p className="text-2xl text-gray-500">{prompt.prompt}</p>
+          <div key={index} className="p-6 border rounded-3xl mb-8">
+            <p className="text-2xl mb-2">{prompt.name}</p>
+            <p className="text-xl text-gray-500">{prompt.prompt}</p>
 
-            <div className="flex justify-end gap-x-2 mt-5">
+            <div className="flex justify-end gap-x-2 mt-10">
               <Button variant="outline" onClick={() => copyToClipboard(prompt.prompt)}>
                 <Copy />
                 {btnText}
@@ -45,7 +46,6 @@ export const Complete = ({ prompts }: { prompts: { name: string, prompt: string 
                   <Save />
                   Editar prompt
                 </Link>
-
               </Button>
 
               <Button asChild variant="default">
