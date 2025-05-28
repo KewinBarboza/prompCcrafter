@@ -16,8 +16,8 @@ export const StyleAndTone = ({
     <div>
       <textarea
         onInput={handleChange}
-        name="style" rows={3} required
-        className="w-full min-w-4xl px-4 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
+        name="style" required
+        className="w-full min-w-4xl px-4 h-32 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content resize-none"
         placeholder="Especifica otro estilo..."></textarea>
 
       <div className="mt-4 space-y-2">

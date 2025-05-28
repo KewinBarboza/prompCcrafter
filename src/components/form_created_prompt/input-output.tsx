@@ -17,8 +17,8 @@ export const InputOutput = ({
       <textarea
         name="inputOutput" rows={3} required
         onInput={handleChange}
-        className="w-full min-w-4xl px-4 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content"
-        placeholder="Ej: \nEntrada: Traduce 'Hola Mundo' al francés.\nSalida: Bonjour le monde.\n\nEntrada: Cliente pregunta por el estado de su pedido #123.\nSalida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea>
+        className="w-full min-w-4xl px-4 h-32 py-2 border border-neutral-200 rounded-3xl p-5 text-xl focus:outline-none focus:ring-2 focus:ring-primary field-sizing-content resize-none"
+        placeholder="Entrada: Traduce 'Hola Mundo' al francés.&#10;Salida: Bonjour le monde.&#10;&#10;Entrada: Cliente pregunta por el estado de su pedido #123.&#10;Salida: Estimado cliente, su pedido #123 ha sido enviado..."></textarea>
 
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">O selecciona un ejemplo</span>
