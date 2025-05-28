@@ -146,8 +146,6 @@ export default function CreatedPrompt() {
     } finally {
       setIsLoading(false)
     }
-
-
   }
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -201,7 +199,7 @@ export default function CreatedPrompt() {
               {methods.when("step-5", () => <StyleAndTone handleChange={handleChange} suggestions={suggestions.style} isLoading={isLoading} />)}
               {methods.when("step-6", () => <Settings handleChange={handleChange} />)}
 
-              <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-neutral-200">
+              <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-neutral-200 bg-white">
                 {
                   methods.isLast === false ? (
                     <div className="flex justify-between w-full">
