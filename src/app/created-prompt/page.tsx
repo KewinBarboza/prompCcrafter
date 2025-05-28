@@ -107,55 +107,47 @@ export default function CreatedPrompt() {
     }
   }
 
-  const createSuggestion = () => {
+  const createSuggestion = async () => {
+    if (currentIndex === 4) {
+      methods.next()
+      return
+    }
     methods.next()
-
-    if (currentIndex === 4) return
-
     setIsLoading(true)
 
-    const { context, objective } = formData
-    const question = promptsSuggestion(context, objective, currentIndex)
-
-    fetch("/api/suggestion", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: question,
-    }).then((res) => res.json())
-      .then((data) => {
-        if (currentIndex === 0) {
-          setSuggestions((prev) => ({
-            ...prev,
-            context: data.suggestions
-          }))
-        }
-        if (currentIndex === 1) {
-          setSuggestions((prev) => ({
-            ...prev,
-            inputOutput: data.suggestions
-          }))
-        }
-        if (currentIndex === 2) {
-          setSuggestions((prev) => ({
-            ...prev,
-            format: data.suggestions
-          }))
-        }
-        if (currentIndex === 3) {
-          setSuggestions((prev) => ({
-            ...prev,
-            style: data.suggestions
-          }))
-        }
-      }).catch((error) => {
-        console.error("Error:", error)
-
-
-      }).finally(() => {
-        setIsLoading(false)
+    try {
+      const { context, objective } = formData
+      const question = promptsSuggestion(context, objective, currentIndex)
+      console.log(question)
+      const response = await fetch("/api/suggestion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: question,
       })
+
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.status} ${response.statusText}`)
+      }
+
+      const data = await response.json()
+
+      const suggestionKeys = ["context", "inputOutput", "format", "style"]
+      if (currentIndex >= 0 && currentIndex < suggestionKeys.length) {
+        const key = suggestionKeys[currentIndex]
+        setSuggestions((prev) => ({
+          ...prev,
+          [key]: data.suggestions,
+        }))
+      }
+    } catch (error) {
+      console.error("Error al obtener sugerencias:", error)
+    } finally {
+      setIsLoading(false)
+    }
+
+
   }
 
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
