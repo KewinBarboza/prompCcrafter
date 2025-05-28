@@ -118,7 +118,7 @@ export default function CreatedPrompt() {
     try {
       const { context, objective } = formData
       const question = promptsSuggestion(context, objective, currentIndex)
-      console.log(question)
+
       const response = await fetch("/api/suggestion", {
         method: "POST",
         headers: {
