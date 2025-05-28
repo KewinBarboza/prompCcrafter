@@ -1,8 +1,17 @@
 import { FormEventHandler } from "react"
 import { ObjectiveSummaryExample } from "../form/radio"
 import { handleRadioToTextarea } from "@/lib/utils"
+import { SkeletonList } from "../skeleton-list"
 
-export const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement> }) => {
+export const Task = ({
+  handleChange,
+  suggestions,
+  isLoading
+}: {
+  handleChange: FormEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  suggestions: { name: string; suggestion: string }[]
+  isLoading: boolean
+}) => {
   return (
     <div>
       <textarea
@@ -15,34 +24,20 @@ export const Task = ({ handleChange }: { handleChange: FormEventHandler<HTMLText
       <div className="mt-4 space-y-2">
         <span className="text-gray-600 block mb-3 mt-5">Sugerencias</span>
         <div className="grid md:grid-cols-2 grid-cols-1 gap-7">
-          <ObjectiveSummaryExample
-            name="objective"
-            value="Resume un texto explicando solo los puntos clave sin agregar opiniones personales."
-            label="Resumen objetivo"
-            description="Resume un texto sin agregar opiniones, manteniendo claridad."
-            handleRadioToTextarea={handleRadioToTextarea}
-          />
-          <ObjectiveSummaryExample
-            name="objective"
-            value="Clasifica reseñas en positivas, negativas o neutrales y explica brevemente por qué."
-            label="Clasificación de sentimiento"
-            description="Categoriza y justifica reseñas de usuarios."
-            handleRadioToTextarea={handleRadioToTextarea}
-          />
-          <ObjectiveSummaryExample
-            name="objective"
-            value="Genera una función en Python documentada y con prueba unitaria que invierta una cadena."
-            label="Código con test"
-            description="Crear función funcional y bien documentada."
-            handleRadioToTextarea={handleRadioToTextarea}
-          />
-          <ObjectiveSummaryExample
-            name="objective"
-            value="Crea una tabla con los principales indicadores de rendimiento de marketing y sus metas."
-            label="Tabla de KPIs"
-            description="Representar KPIs con claridad en formato tabular."
-            handleRadioToTextarea={handleRadioToTextarea}
-          />
+          {isLoading ? (
+            <SkeletonList />
+          ) : (
+            suggestions.map((suggestion, index) => (
+              <ObjectiveSummaryExample
+                key={index}
+                handleRadioToTextarea={handleRadioToTextarea}
+                name="objective"
+                value={suggestion.suggestion}
+                label={suggestion.name}
+                description={suggestion.suggestion}
+              />
+            ))
+          )}
         </div>
       </div>
     </div>
